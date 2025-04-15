@@ -1,0 +1,92 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f7f7f7; /* Un fundal gri deschis */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.register-container {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* O umbră mai pronunțată */
+    width: 450px; /* O lățime puțin mai mare */
+    text-align: center;
+}
+
+.register-container h2 {
+    color: #333;
+    margin-bottom: 30px; /* Mai mult spațiu sub titlu */
+    font-size: 2.2em;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 20px; /* Mai mult spațiu între câmpuri */
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px; /* Mai mult spațiu sub etichetă */
+    font-weight: bold;
+    color: #555;
+    font-size: 1em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: calc(100% - 22px); /* Ajustare pentru padding și border */
+    padding: 12px; /* Mai mult padding intern */
+    border: 1px solid #ddd;
+    border-radius: 6px; /* Margini mai rotunjite */
+    box-sizing: border-box;
+    font-size: 1em;
+    color: #333;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus {
+    outline: none;
+    border-color: #007bff; /* Culoare la focus */
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.25); /* Umbră la focus */
+}
+
+.register-container button[type="submit"] {
+    background-color: #28a745; /* Verde mai vibrant */
+    color: white;
+    padding: 14px 24px; /* Mai mult padding pentru buton */
+    border: none;
+    border-radius: 6px; /* Margini mai rotunjite */
+    cursor: pointer;
+    font-size: 1.1em;
+    width: 100%;
+    margin-top: 25px; /* Mai mult spațiu deasupra butonului */
+    transition: background-color 0.3s ease; /* Animație la hover */
+}
+
+.register-container button[type="submit"]:hover {
+    background-color: #1e7e34; /* Verde mai închis la hover */
+}
+
+.register-container p {
+    margin-top: 20px; /* Mai mult spațiu deasupra textului */
+    color: #777;
+    font-size: 0.9em;
+}
+
+.register-container p a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.register-container p a:hover {
+    text-decoration: underline;
+}

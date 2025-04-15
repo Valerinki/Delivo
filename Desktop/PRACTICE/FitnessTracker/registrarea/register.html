@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Înregistrare - Fitness Tracer</title>
+</head>
+<body>
+<h2>Înregistrare</h2>
+<form id="registerForm">
+<div>
+<label for="name">Nume:</label>
+<input type="text" id="name" name="name" required>
+</div>
+<div>
+<label for="email">Email:</label>
+<input type="email" id="email" name="email" required>
+<div id="email-error" style="color: red;"></div>
+</div>
+<div>
+<label for="password">Parolă:</label>
+<input type="password" id="password" name="password" required>
+<div id="password-error" style="color: red;"></div>
+</div>
+<button type="submit">Înregistrare</button>
+<div id="registration-message" style="color: green;"></div>
+<div id="registration-error" style="color: red;"></div>
+</form>
+<p>Ai deja un cont? <a href="../autentificarea/auth.html">Autentifică-te</a></p>   
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const emailErrorDiv = document.getElementById('email-error');
+        const passwordErrorDiv = document.getElementById('password-error');
+        const registrationMessageDiv = document.getElementById('registration-message');
+        const registrationErrorDiv = document.getElementById('registration-error');
+
+        emailErrorDiv.textContent = '';
+        passwordErrorDiv.textContent = '';
+        registrationMessageDiv.textContent = '';
+        registrationErrorDiv.textContent = '';
+
+        const name = nameInput.value;
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        if (!email.includes('@')) {
+            emailErrorDiv.textContent = 'Introduceți un email valid.';
+            return;
+        }
+        if (password.length < 6) {
+            passwordErrorDiv.textContent = 'Parola trebuie să aibă cel puțin 6 caractere.';
+            return;
+        }
+
+        fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: name, email: email, password: password }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                registrationMessageDiv.textContent = data.message;
+                setTimeout(() => {
+                    window.location.href = '../autentificarea/auth.html';
+                }, 1500);
+            } else {
+                registrationErrorDiv.textContent = data.error;
+            }
+        })
+        .catch(error => {
+            console.error('Eroare la trimiterea cererii:', error);
+            registrationErrorDiv.textContent = 'A apărut o eroare la înregistrare.';
+        });
+    });
+</script>
+</body>
+</html>
+```

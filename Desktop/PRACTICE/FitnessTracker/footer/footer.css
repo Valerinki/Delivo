@@ -1,0 +1,14 @@
+#footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed; /* Poate fi fixat în partea de jos */
+    bottom: 0;
+    width: 100%;
+}
+
+#footer .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
