@@ -1,0 +1,804 @@
+body {
+  background: url('background.jpg') no-repeat center center fixed; /* Imagine de fundal */
+  background-size: cover; /* Acoperă întreaga pagină */
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif; /* Aplică fontul Poppins */
+  margin: 0;
+  padding: 0;
+  position: relative; /* Asigură poziționarea pentru suprapunere */
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Suprapunere întunecată pentru reducerea luminozității */
+  z-index: -1; /* Asigură că suprapunerea este sub conținut */
+}
+
+.main-container,
+.saved-trainings-container,
+.section,
+#despre-noi {
+  text-align: center;
+  margin: 55px auto; /* Creștem spațiul de deasupra containerului */
+  padding: 40px; /* Spațiu interior */
+  background: linear-gradient(135deg, #000000, #003366); /* Gradient negru/albastru */
+  border: 2px solid #0056b3; /* Bordură albastră */
+  border-radius: 20px; /* Colțuri mai rotunjite */
+  width: 60%; /* Lățime mai mică pentru un aspect compact */
+  max-width: 800px; /* Lățime maximă */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); /* Umbră mai pronunțată */
+  position: relative;
+  z-index: 1; /* Implicit, pagina principală este deasupra */
+  animation: fadeIn 0.3s ease-in-out; /* Reducem durata animației */
+}
+
+.main-container h1,
+.saved-trainings-container h2,
+.section h2,
+#despre-noi h2 {
+  color: #00aaff; /* Text albastru deschis */
+  font-size: 32px; /* Dimensiune mai mare pentru titlu */
+  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif; /* Aplicăm același font */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adăugăm un efect de umbră */
+  letter-spacing: 1.5px; /* Spațiere între litere pentru un aspect modern */
+  text-transform: uppercase; /* Transformare în majuscule */
+}
+
+.main-container form,
+.section form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Spațiu mai mare între elemente */
+  align-items: center; /* Centrează elementele în interiorul formularului */
+}
+
+.main-container label,
+.section label,
+#despre-noi p {
+  width: 85%; /* Lățime completă pentru aliniere cu marginile */
+  text-align: left; /* Aliniere la stânga pentru text */
+  font-size: 16px;
+  color: #e0e0e0; /* Text deschis */
+  font-family: 'Poppins', sans-serif; /* Aplicăm același font */
+}
+
+.main-container select,
+.main-container input,
+.section select,
+.section input {
+  width: calc(100% - 20px); /* Ajustează lățimea pentru a se potrivi cu padding-ul */
+  max-width: 500px; /* Lățime maximă pentru input-uri */
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #0056b3; /* Bordură albastră */
+  border-radius: 8px; /* Colțuri mai rotunjite */
+  background: linear-gradient(135deg, #000000, #003366); /* Gradient negru/albastru */
+  color: #ffffff; /* Text alb */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Umbră pentru evidențiere */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Tranziții pentru hover */
+}
+
+.main-container select:focus,
+.main-container input:focus,
+.section select:focus,
+.section input:focus {
+  border-color: #00aaff; /* Bordură mai deschisă la focus */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7); /* Umbră mai mare la focus */
+  outline: none; /* Eliminăm conturul implicit */
+}
+
+.main-container button,
+.section button {
+  width: calc(100% - 20px); /* Ajustează lățimea pentru a se potrivi cu padding-ul */
+  max-width: 500px; /* Lățime maximă pentru butoane */
+  padding: 12px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #003366, #0056b3, #0077cc); /* Gradient albastru vibrant */
+  color: #ffffff; /* Text alb */
+  border: 2px solid #0056b3; /* Bordură albastră */
+  border-radius: 8px; /* Colțuri mai rotunjite */
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s; /* Adăugăm tranziții */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6); /* Umbră mai pronunțată */
+}
+
+.main-container button:hover,
+.section button:hover {
+  background: linear-gradient(135deg, #002244, #003366, #0056b3); /* Gradient mai închis la hover */
+  transform: translateY(-3px); /* Efect de ridicare la hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); /* Umbră mai mare la hover */
+}
+
+.main-container button:active,
+.section button:active {
+  transform: translateY(1px); /* Efect de apăsare */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Reducem umbra */
+}
+
+.overlay-container {
+  position: fixed;
+  top: 60px; /* Sub navbar */
+  left: 250px; /* Lângă bara laterală */
+  width: calc(100% - 250px); /* Ocupă spațiul rămas */
+  height: calc(100% - 60px); /* Ocupă spațiul sub navbar */
+  background-color: rgba(30, 30, 30, 0.95); /* Fundal întunecat translucid */
+  border-radius: 12px; /* Colțuri rotunjite */
+  box-shadow: 0 4px 20px rgba(0, 191, 255, 0.1); /* Umbră subtilă */
+  padding: 20px;
+  overflow-y: auto; /* Permite derularea dacă conținutul este prea mare */
+  z-index: 999; /* Deasupra altor elemente */
+  display: none; /* Ascuns implicit */
+}
+
+.overlay-container.hidden {
+  display: none; /* Ascunde containerul */
+}
+
+.overlay-container.active {
+  display: flex; /* Afișează containerul când este activ */
+  flex-direction: column;
+  gap: 15px;
+}
+
+.overlay-container h2 {
+  color: #00bfff; /* Culoare evidențiată pentru titluri */
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.overlay-container button.close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ffffff;
+  transition: color 0.3s;
+}
+
+.overlay-container button.close-button:hover {
+  color: #ff0000; /* Culoare roșie la hover */
+}
+
+.overlay-container input, .overlay-container select, .overlay-container button {
+  width: 100%; /* Lățime completă */
+  max-width: 500px; /* Lățime maximă pentru estetică */
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.1); /* Fundal translucid */
+  color: #ffffff;
+}
+
+.overlay-container button {
+  background-color: #00bfff;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.overlay-container button:hover {
+  background-color: #00a2cc;
+}
+
+.main-container h1, .section h2, .overlay-container h2 {
+  color: #00aaff; /* Culoare evidențiată pentru titluri */
+}
+
+input, button {
+  background-color: rgba(255, 255, 255, 0.1); /* Fundal translucid */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #00bfff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0088cc;
+}
+
+.section {
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Bordură translucidă */
+  max-width: 800px; /* Lățime maximă */
+  position: relative;
+  z-index: 10; /* Asigură că secțiunea este deasupra altor elemente */
+}
+
+.section p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #e0e0e0; /* Culoare text deschis */
+}
+
+.training-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.training-list li {
+  background: rgba(0, 51, 102, 0.8); /* Fundal translucid */
+  border: 1px solid rgba(0, 51, 102, 0.5); /* Bordură translucidă */
+  border-radius: 8px; /* Colțuri rotunjite */
+  padding: 8px; /* Reducem spațiul interior al fiecărui element */
+  margin-bottom: 8px; /* Reducem spațiul dintre elemente */
+  color: #e0e0e0; /* Text deschis */
+  font-size: 14px; /* Reducem dimensiunea textului */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.training-list li:hover {
+  transform: scale(1.05); /* Efect de mărire la hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+.food-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.food-list li {
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 16px;
+}
+
+#trainingForm {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 20px auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+#trainingForm label {
+  display: block; /* Asigurăm afișarea pe un rând separat */
+  margin-bottom: 15px; /* Adăugăm spațiu între text și elementul următor */
+  font-size: 16px; /* Dimensiune text */
+  color: #ffffff; /* Culoare text */
+}
+
+#trainingForm input {
+  background-color: #003366; /* Fundal albastru specific aplicației */
+  color: #ffffff; /* Text alb pentru contrast */
+  border: 1px solid #00aaff; /* Bordură albastru deschis */
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+#trainingForm input::placeholder {
+  color: #80cfff; /* Culoare deschisă pentru textul placeholder */
+  opacity: 0.8; /* Ușor transparent */
+}
+
+#trainingForm button {
+  background-color: #007bff; /* Albastru */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#trainingForm button:hover {
+  background-color: #0056b3; /* Albastru mai închis */
+}
+
+#trainingForm select:focus,
+#trainingForm input:focus {
+  background-color: #003366; /* Fundal albastru specific aplicației */
+  color: #ffffff; /* Text alb pentru contrast */
+  border-color: #00aaff; /* Bordură albastru deschis */
+  outline: none; /* Eliminăm conturul implicit */
+}
+
+.saved-trainings-container {
+  background: linear-gradient(135deg, #003366, #0056b3); /* Gradient atractiv */
+  border: 2px solid #00aaff; /* Bordură evidențiată */
+  border-radius: 15px; /* Colțuri rotunjite */
+  max-width: 600px; /* Reducem lățimea maximă */
+  padding: 15px; /* Reducem spațiul interior */
+  margin: 20px auto; /* Ajustăm marginile pentru a fi mai compacte */
+  font-size: 14px; /* Reducem dimensiunea fontului */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Umbră mai pronunțată */
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+}
+
+.saved-trainings-container h2 {
+  font-size: 1.5rem; /* Reducem dimensiunea titlului */
+  margin-bottom: 10px; /* Reducem spațiul de sub titlu */
+  color: #00d4ff; /* Culoare evidențiată */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Umbră pentru text */
+}
+
+.training-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.training-list li {
+  background: rgba(0, 51, 102, 0.8); /* Fundal translucid */
+  border: 1px solid rgba(0, 51, 102, 0.5); /* Bordură translucidă */
+  border-radius: 8px; /* Colțuri rotunjite */
+  padding: 8px; /* Reducem spațiul interior al fiecărui element */
+  margin-bottom: 8px; /* Reducem spațiul dintre elemente */
+  color: #e0e0e0; /* Text deschis */
+  font-size: 14px; /* Reducem dimensiunea textului */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.training-list li:hover {
+  transform: scale(1.05); /* Efect de mărire la hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+.training-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(0, 51, 102, 0.8); /* Fundal translucid */
+  border: 1px solid rgba(0, 51, 102, 0.5); /* Bordură translucidă */
+  border-radius: 8px; /* Colțuri rotunjite */
+  color: #e0e0e0; /* Text deschis */
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.training-item:hover {
+  transform: scale(1.05); /* Efect de mărire la hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+.training-info {
+  flex: 1;
+}
+
+.training-date {
+  font-size: 0.9rem;
+  color: #aaa; /* Culoare mai deschisă pentru dată */
+}
+
+.delete-button {
+  background: linear-gradient(135deg, #ff4d4d, #ff6666); /* Gradient roșu */
+  color: white;
+  border: none;
+  border-radius: 8px; /* Colțuri rotunjite */
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.3s ease, transform 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+}
+
+.delete-button:hover {
+  background: linear-gradient(135deg, #cc0000, #ff4d4d); /* Gradient mai închis la hover */
+  transform: translateY(-2px); /* Efect de ridicare */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+.delete-button:active {
+  transform: translateY(1px); /* Efect de apăsare */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Reducem umbra */
+}
+
+a {
+  color: #00aaff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #0077cc;
+}
+
+button, input:focus {
+  outline: none;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #003366; /* Culoare evidențiată pentru navbar */
+  padding: 15px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%; /* Navbar pe toată lățimea paginii */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-info .profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+}
+
+.user-info #username {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 25px; /* Spațiere între butoane */
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  display: inline; /* Asigură afișarea pe orizontală */
+}
+
+.nav-links li a {
+  text-decoration: none; /* Elimină sublinierea */
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 15px; /* Spațiere internă pentru evidențiere */
+  border-radius: 5px; /* Colțuri rotunjite */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-links li a:hover {
+  background-color: #0077cc; /* Evidențiere pe hover */
+}
+
+.card-section {
+  margin: 40px auto;
+  padding: 20px;
+  max-width: 900px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 191, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-section h2 {
+  color: #00bfff;
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  background-color: #2b2b2b;
+  border: 1px solid #444;
+  border-radius: 8px;
+  color: #fff;
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.btn-submit {
+  padding: 12px 24px;
+  background-color: #00bfff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #00a2cc;
+}
+
+.jurnal-list li {
+  padding: 8px 10px;
+  background: #252525;
+  margin-top: 5px;
+  border-radius: 6px;
+  list-style: none;
+}
+
+.chart-box, .calendar-box {
+  margin-top: 20px;
+  background-color: #2b2b2b;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+iframe {
+  z-index: 0;
+}
+
+#sidebar.active + iframe {
+  z-index: 2; /* Bara laterală activă aduce iframe-ul deasupra */
+}
+
+#sidebar.active {
+  z-index: 3; /* Bara laterală este deasupra când este activă */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.recomandari-buttons {
+  display: flex; /* Aranjare pe orizontală */
+  justify-content: space-between; /* Spațiere egală între butoane */
+  gap: 15px; /* Spațiu între butoane */
+  margin-bottom: 20px;
+  width: 100%; /* Ocupă întreaga lățime a containerului */
+}
+
+.recomandari-buttons button {
+  flex: 1; /* Fiecare buton ocupă spațiu egal */
+  padding: 10px 15px; /* Spațiu interior */
+  font-size: 16px; /* Dimensiune text */
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0077cc, #00aaff);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px; /* Colțuri rotunjite */
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  text-align: center; /* Aliniere text */
+}
+
+.recomandari-buttons button:hover {
+  background: linear-gradient(135deg, #0056b3, #0077cc);
+  transform: translateY(-3px); /* Efect de ridicare la hover */
+}
+
+.recomandari-buttons button:active {
+  transform: translateY(1px); /* Efect de apăsare */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.recomandari-content {
+  background: linear-gradient(135deg, #002244, #004488); /* Gradient atractiv */
+  border: 2px solid #00aaff; /* Bordură evidențiată */
+  border-radius: 15px; /* Colțuri rotunjite */
+  padding: 20px;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Umbră mai pronunțată */
+  transition: opacity 0.3s ease-in-out;
+}
+
+.recomandari-content h3 {
+  color: #00d4ff; /* Culoare evidențiată */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Umbră pentru text */
+  margin-bottom: 15px;
+}
+
+.recomandari-content ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recomandari-content li {
+  background: rgba(0, 51, 102, 0.8); /* Fundal translucid */
+  border: 1px solid rgba(0, 51, 102, 0.5); /* Bordură translucidă */
+  border-radius: 8px; /* Colțuri rotunjite */
+  padding: 10px;
+  margin-bottom: 10px;
+  color: #e0e0e0; /* Text deschis */
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recomandari-content li:hover {
+  transform: scale(1.05); /* Efect de mărire la hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+#despre-noi {
+  background: linear-gradient(135deg, #002244, #004488); /* Gradient atractiv */
+  border: 2px solid #00aaff; /* Bordură evidențiată */
+  border-radius: 15px; /* Colțuri rotunjite */
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 800px; /* Lățime maximă */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Umbră mai pronunțată */
+  color: #e0e0e0; /* Text deschis */
+  font-family: 'Poppins', sans-serif;
+  text-align: left;
+}
+
+#despre-noi h2 {
+  color: #00d4ff; /* Culoare evidențiată pentru titlu */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Umbră pentru text */
+  font-size: 2rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+#despre-noi h3 {
+  color: #00aaff; /* Culoare evidențiată pentru subtitluri */
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+#despre-noi p {
+  line-height: 1.8;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+#despre-noi ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#despre-noi ul li {
+  background: rgba(0, 51, 102, 0.8); /* Fundal translucid */
+  border: 1px solid rgba(0, 51, 102, 0.5); /* Bordură translucidă */
+  border-radius: 8px; /* Colțuri rotunjite */
+  padding: 10px;
+  margin-bottom: 10px;
+  color: #e0e0e0; /* Text deschis */
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#despre-noi ul li:hover {
+  transform: scale(1.05); /* Efect de mărire la hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+#despre-noi a {
+  color: #00bfff; /* Culoare evidențiată pentru linkuri */
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+#despre-noi a:hover {
+  color: #0077cc; /* Culoare mai închisă la hover */
+}
+
+/* Spinner pentru iframe */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sidebar îmbunătățit */
+.sidebar {
+  width: 60px;
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.sidebar.expanded {
+  width: 250px;
+}
+
+.sidebar ul li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: justify-content 0.3s ease-in-out;
+}
+
+.sidebar.expanded ul li {
+  justify-content: flex-start;
+}
+
+/* Dark mode */
+body.dark-mode {
+  background: #121212;
+  color: #ffffff;
+}
+
+body.dark-mode .navbar,
+body.dark-mode .sidebar {
+  background: #1e1e1e;
+}
+
+body.dark-mode .sidebar ul li a {
+  color: #ffffff;
+}
+
+body.dark-mode #darkModeToggle {
+  background: #ffffff;
+  color: #333;
+}
+
+#workoutType {
+  background-color: #1f1f1f; /* Fundal similar cu aplicația */
+  color: #00bfff; /* Text vizibil */
+  border: 1px solid #00bfff; /* Bordură albastră */
+  border-radius: 5px; /* Colțuri rotunjite */
+  padding: 10px; /* Spațiu interior */
+  font-size: 16px; /* Dimensiune text */
+  width: 100%; /* Lățime completă */
+  margin-top: 10px; /* Spațiu de sus */
+  outline: none; /* Eliminăm conturul implicit */
+  transition: border-color 0.3s, background-color 0.3s; /* Tranziții pentru hover */
+}
+
+#workoutType:focus {
+  border-color: #0088cc; /* Bordură mai închisă la focus */
+  background-color: #121212; /* Fundal mai închis la focus */
+}
+
+#workoutType option {
+  background-color: #1f1f1f; /* Fundal pentru opțiuni */
+  color: #ffffff; /* Text alb pentru opțiuni */
+}

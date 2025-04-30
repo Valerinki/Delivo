@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitnessTracker - Scopuri pentru Azi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    #plansContainer {
+      margin: 0 auto; /* Centrare pe orizontală */
+      padding: 40px; /* Păstrăm padding-ul pentru un aspect aerisit */
+      width: 80vw; /* Lățime de 80% din pagină */
+      height: 80vh; /* Înălțime de 80% din pagină */
+      background-color: #1f1f1f;
+      border-radius: 10px; /* Colțuri rotunjite pentru un aspect plăcut */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adăugăm o umbră subtilă */
+      position: fixed; /* Poziționare fixă pentru centrare */
+      top: 50%; /* Centrare pe verticală */
+      left: 50%; /* Centrare pe orizontală */
+      transform: translate(-50%, -50%); /* Ajustare pentru centrare exactă */
+    }
+
+    #closePlansContainer {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #ffffff;
+      transition: color 0.3s;
+    }
+
+    #closePlansContainer:hover {
+      color: #ff0000;
+    }
+
+    .section {
+      text-align: center;
+      margin-bottom: 40px; /* Mărim spațiul de jos */
+      padding: 20px; /* Adăugăm padding pentru un aspect mai aerisit */
+      background-color: #1a1a1a; /* Fundal mai proeminent */
+      border-radius: 10px; /* Colțuri rotunjite */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Adăugăm o umbră subtilă */
+    }
+
+    .section h2 {
+      color: #00bfff;
+      margin-bottom: 20px; /* Spațiu între titlu și conținut */
+    }
+
+    #planList {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .plan-item {
+      display: flex;
+      align-items: center; /* Aliniem elementele pe verticală */
+      justify-content: space-between; /* Distribuim elementele pe rând */
+      background: #121212;
+      border: 1px solid #00bfff;
+      border-radius: 8px;
+      padding: 10px; /* Reducem padding-ul */
+      margin-bottom: 10px;
+      transition: background 0.3s;
+    }
+
+    .plan-item.completed {
+      background-color: #004466;
+      text-decoration: line-through;
+      color: #00ffcc;
+    }
+
+    .plan-content {
+      flex: 1; /* Permitem textului să ocupe spațiul disponibil */
+      text-align: left;
+      font-size: 14px; /* Reducem dimensiunea textului */
+      margin-right: 10px; /* Spațiu între text și dată */
+    }
+
+    .plan-date {
+      font-size: 12px; /* Dimensiune mai mică pentru dată */
+      color: #aaaaaa;
+      margin-right: 20px; /* Adăugăm spațiu între dată și caseta pentru bifare */
+    }
+
+    .plan-checkbox {
+      width: 20px;
+      height: 20px;
+      accent-color: #00bfff;
+      cursor: pointer;
+      margin-left: auto; /* Mutăm checkbox-ul în partea dreaptă */
+    }
+
+    #addPlanButton {
+      background-color: #00bfff;
+      color: white;
+      border: none;
+      padding: 12px 20px; /* Mărim dimensiunea butonului */
+      font-size: 16px; /* Mărim dimensiunea textului */
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px; /* Spațiu între textarea și buton */
+      transition: background-color 0.3s;
+    }
+
+    #addPlanButton:hover {
+      background-color: #0088cc;
+    }
+
+    #planInput {
+      width: 100%;
+      height: 80px; /* Mărim înălțimea textarea */
+      padding: 12px; /* Mărim padding-ul */
+      margin-top: 10px;
+      border: 1px solid #00bfff;
+      border-radius: 5px;
+      background: #121212;
+      color: white;
+      resize: none;
+      font-size: 16px; /* Mărim dimensiunea textului */
+    }
+  </style>
+</head>
+<body>
+  <div id="plansContainer">
+    <button id="closePlansContainer">✖</button>
+    <section class="section">
+      <h2>📋 Scopuri pentru Azi</h2>
+      <textarea id="planInput" placeholder="Ex: Sa fac 3 serii a câte 15 flotări, Sa fac 6 km cu bicicleta."></textarea>
+      <button id="addPlanButton">Adaugă Scop</button>
+      <ul id="planList"></ul>
+    </section>
+  </div>
+
+  <script>
+    const planInput = document.getElementById('planInput');
+    const addPlanButton = document.getElementById('addPlanButton');
+    const planList = document.getElementById('planList');
+    const plansKey = `dailyPlans_${new Date().toLocaleDateString()}`; // Cheie unică pentru ziua curentă
+    let savedPlans = JSON.parse(localStorage.getItem(plansKey)) || [];
+
+    function renderPlans() {
+      planList.innerHTML = '';
+      if (savedPlans.length === 0) {
+        planList.innerHTML = '<li>Nu există scopuri pentru azi.</li>';
+      } else {
+        savedPlans.forEach((plan, index) => {
+          const listItem = document.createElement('li');
+          listItem.className = 'plan-item';
+          if (plan.completed) {
+            listItem.classList.add('completed');
+          }
+
+          const content = document.createElement('div');
+          content.className = 'plan-content';
+          content.textContent = plan.text;
+
+          const date = document.createElement('div');
+          date.className = 'plan-date';
+          date.textContent = `Adăugat pe: ${plan.date}`;
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'plan-checkbox';
+          checkbox.checked = plan.completed;
+          checkbox.addEventListener('change', () => {
+            savedPlans[index].completed = checkbox.checked;
+            localStorage.setItem(plansKey, JSON.stringify(savedPlans));
+            renderPlans();
+          });
+
+          listItem.appendChild(content);
+          listItem.appendChild(date);
+          listItem.appendChild(checkbox);
+          planList.appendChild(listItem);
+        });
+      }
+    }
+
+    addPlanButton.addEventListener('click', () => {
+      const planText = planInput.value.trim();
+      if (planText) {
+        const newPlan = {
+          text: planText,
+          completed: false,
+          date: new Date().toLocaleString() // Adăugăm data și ora curentă
+        };
+        savedPlans.push(newPlan);
+        localStorage.setItem(plansKey, JSON.stringify(savedPlans));
+        planInput.value = '';
+        renderPlans();
+      } else {
+        alert('Te rugăm să introduci un scop!');
+      }
+    });
+
+    renderPlans();
+
+    // Închidere container și revenire
+    const closePlansContainer = document.getElementById('closePlansContainer');
+    if (closePlansContainer) {
+      closePlansContainer.addEventListener('click', function () {
+        const contentFrame = window.parent.document.getElementById('contentFrame');
+        if (contentFrame) {
+          contentFrame.src = ''; // Golește iframe-ul
+        } else {
+          console.error('Iframe-ul nu a fost găsit.');
+        }
+      });
+    } else {
+      console.error('Butonul de închidere nu a fost găsit.');
+    }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const plansContainer = document.getElementById('plansContainer');
+      const closePlansContainer = document.getElementById('closePlansContainer');
+
+      if (plansContainer) {
+        let startX = 0;
+
+        plansContainer.addEventListener('touchstart', function (event) {
+          startX = event.touches[0].clientX;
+        });
+
+        plansContainer.addEventListener('touchmove', function (event) {
+          const currentX = event.touches[0].clientX;
+          const diffX = currentX - startX;
+
+          if (diffX > 100) { // Swipe dreapta
+            if (closePlansContainer) {
+              closePlansContainer.click();
+            }
+          } else if (diffX < -100) { // Swipe stânga
+            console.log('Swipe stânga detectat'); // Puteți adăuga funcționalitate suplimentară aici
+          }
+        });
+      }
+
+      if (closePlansContainer) {
+        closePlansContainer.addEventListener('click', function () {
+          const contentFrame = window.parent.document.getElementById('contentFrame');
+          if (contentFrame) {
+            contentFrame.src = 'about:blank'; // Golește iframe-ul
+          } else {
+            console.error('Iframe-ul nu a fost găsit.');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

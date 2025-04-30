@@ -1,0 +1,25 @@
+<div id="sidebar" class="sidebar">
+  <ul>
+    <li><a href="#" data-target="calendarContainer">🗓️ Calendar de Antrenamente</a></li>
+    <li><a href="#" data-target="progressContainer">📈 Progress Tracker</a></li>
+    <li><a href="#" data-target="achievementsContainer">🏅 Sistem de Medalii</a></li>
+    <li><a href="#" data-target="plansContainer">📋 Planuri Personalizate</a></li>
+    <li><a href="#" data-target="foodJournalContainer">🥗 Jurnal Alimentar</a></li>
+  </ul>
+  <div class="user-info" style="position: absolute; bottom: 20px; left: 20px; display: flex; align-items: center;">
+    <img src="../Avatar.jpg" alt="Avatar Utilizator" class="avatar-img" style="height: 50px; width: 50px; border-radius: 50%; margin-right: 10px;">
+    <span id="sidebarUsername" class="username" style="font-size: 16px; color: #fff;">Nume Utilizator</span>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')); // Preia utilizatorul autentificat
+
+    if (currentUser && currentUser.username) {
+      sidebarUsername.textContent = currentUser.username; // Afișează numele utilizatorului autentificat
+    } else {
+      sidebarUsername.textContent = "Nume Utilizator"; // Valoare implicită
+    }
+  });
+</script>

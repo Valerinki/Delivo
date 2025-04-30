@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitnessTracker - Pagina Principală</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="navbar/navbar.css">
+  <link rel="stylesheet" href="footer/footer.css">
+  <link rel="stylesheet" href="baraLaterala/bara.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="log.jpg" alt="Logo FitnessTracker" class="logo-img">
+      <span class="app-name">FitnessTracker</span> <!-- Denumirea aplicației -->
+      <button id="menuButton" class="menu-button">&#9776;</button> <!-- Buton cu trei linii -->
+    </div>
+    <ul class="nav-links">
+      <li><a href="main.html">Principal</a></li> <!-- Butonul Principal -->
+      <li><a href="#recomandari">Recomandări</a></li>
+      <li><a href="#antrenamente-salvate">Antrenamente Salvate</a></li>
+      <li><a href="#despre-noi">Despre Noi</a></li>
+      <li><a href="autentificarea/auth.html" id="logoutButton">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Include Bara Laterală -->
+  <div id="baraLaterala"></div>
+
+  <div id="sidebar" class="sidebar">
+    <ul>
+      <li><a href="calendar/calendar.html" target="contentFrame">🗓️ Calendar de Antrenamente</a></li>
+      <li><a href="progress/progress.html" target="contentFrame">📈 Progress Tracker</a></li>
+      <li><a href="plans/plans.html" target="contentFrame">📋 Planuri Personalizate</a></li>
+    </ul>
+    <div class="user-info" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center;">
+      <img src="Avatar.png" alt="Avatar Utilizator" class="avatar-img" style="height: 50px; width: 50px; border-radius: 50%; margin-right: 10px;">
+      <span id="sidebarUsername" class="username" style="font-size: 16px; color: #fff;">Nume Utilizator</span>
+    </div>
+  </div>
+
+  <!-- Frame pentru încărcarea conținutului -->
+  <iframe id="contentFrame" style="width: calc(100% - 250px); height: calc(100% - 60px); position: fixed; top: 60px; left: 250px; border: none;"></iframe>
+
+  <!-- Container pentru antrenamente efectuate -->
+  <div class="main-container">
+    <h1>Urmărire Antrenamente</h1>
+    <form id="trainingForm">
+      <label for="workoutType">Tip Antrenament:</label>
+      <select id="workoutType" required>
+        <option value="" disabled hidden selected>Alege tipul de antrenament</option>
+        <option value="cardio">Cardio</option>
+        <option value="forță">Forță</option>
+        <option value="flexibilitate">Flexibilitate</option>
+        <option value="altele">Altele</option>
+      </select>
+      <label for="exercise">Exercițiu:</label>
+      <input type="text" id="exercise" placeholder="Ex: Genuflexiuni" required>
+      <label for="sets">Seturi x Repetări (ex: 3x10):</label>
+      <input type="text" id="sets" placeholder="Ex: 3x10" required>
+      <button type="submit" style="font-family: 'Poppins', sans-serif;">Adaugă Antrenamentul</button>
+    </form>
+  </div>
+
+  <!-- Container pentru antrenamentele salvate -->
+  <div id="antrenamente-salvate" class="saved-trainings-container">
+    <h2>Antrenamentele Salvate</h2>
+    <ul id="trainingList" class="training-list"></ul>
+  </div>
+
+  <!-- Recomandări -->
+  <section id="recomandari" class="section" style="position: relative; z-index: 10;">
+    <h2>Recomandări</h2>
+    <div class="recomandari-buttons">
+      <button id="btnIncepator">Începător</button>
+      <button id="btnMediu">Nivel Mediu</button>
+      <button id="btnAvansat">Avansați</button>
+    </div>
+    <div id="recomandariContent" class="recomandari-content">
+      <!-- Conținutul recomandărilor va fi afișat aici -->
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const btnIncepator = document.getElementById('btnIncepator');
+      const btnMediu = document.getElementById('btnMediu');
+      const btnAvansat = document.getElementById('btnAvansat');
+      const recomandariContent = document.getElementById('recomandariContent');
+
+      if (!btnIncepator || !btnMediu || !btnAvansat || !recomandariContent) {
+        console.error('Elementele necesare pentru recomandări nu au fost găsite în DOM.');
+        return;
+      }
+
+      const recomandari = {
+        incepator: `
+          <h3>💪 Începător</h3>
+          <ul>
+            <li>🔹 Începe cu 2-3 antrenamente pe săptămână. Lasă timp corpului să se adapteze.</li>
+            <li>🔹 Prioritizează exerciții de bază: genuflexiuni, flotări, fandări, planșă.</li>
+            <li>🔹 Învață forma corectă înainte de a crește greutățile – calitatea > cantitatea.</li>
+            <li>🔹 Fă încălzirea minim 5-10 minute înainte de fiecare antrenament.</li>
+            <li>🔹 Înregistrează-ți progresul: câte repetări faci, cât durează un antrenament etc.</li>
+            <li>🔹 Odihna este esențială: dormi cel puțin 7 ore/noapte.</li>
+            <li>🔹 Nu te compara cu alții – fiecare progres e valoros.</li>
+          </ul>
+        `,
+        mediu: `
+          <h3>⚖️ Nivel Mediu</h3>
+          <ul>
+            <li>🔹 Treci la antrenamente de tip split: de ex. „Picioare - Push - Pull”.</li>
+            <li>🔹 Variează intensitatea și durata pentru a evita plafonarea.</li>
+            <li>🔹 Folosește greutăți moderate și urmărește progresia încărcăturii săptămânale.</li>
+            <li>🔹 Începe să folosești un jurnal alimentar dacă ai un obiectiv nutrițional.</li>
+            <li>🔹 Încearcă antrenamente HIIT sau cu greutatea corpului pentru diversificare.</li>
+            <li>🔹 Monitorizează ritmul cardiac și perioadele de recuperare.</li>
+            <li>🔹 Începe să adaugi stretching sau yoga în rutina ta săptămânală.</li>
+          </ul>
+        `,
+        avansat: `
+          <h3>🏆 Avansat (Profi)</h3>
+          <ul>
+            <li>🔹 Folosește metode avansate: superserii, drop sets, tempo controlat.</li>
+            <li>🔹 Optimizează nutriția pentru obiectivele tale – folosește macronutrienți calculați.</li>
+            <li>🔹 Monitorizează somnul, stresul și refacerea musculară cu aplicații sau dispozitive.</li>
+            <li>🔹 Încearcă antrenamente periodizate (forță, volum, definire).</li>
+            <li>🔹 Consultă un antrenor sau nutriționist pentru planificări pe termen lung.</li>
+            <li>🔹 Fă analize de progres la fiecare 4-6 săptămâni (măsurători, poze, greutate).</li>
+            <li>🔹 Oferă-ți zile de „deload” și ascultă-ți corpul.</li>
+          </ul>
+        `
+      };
+
+      btnIncepator.addEventListener('click', () => {
+        recomandariContent.innerHTML = recomandari.incepator;
+      });
+
+      btnMediu.addEventListener('click', () => {
+        recomandariContent.innerHTML = recomandari.mediu;
+      });
+
+      btnAvansat.addEventListener('click', () => {
+        recomandariContent.innerHTML = recomandari.avansat;
+      });
+    });
+  </script>
+
+  <!-- Despre Noi -->
+  <section id="despre-noi" class="section">
+    <h2>Despre Noi</h2>
+
+    <p style="text-indent: 30px;"><strong>FitnessTracker</strong> este mai mult decât o aplicație – este un partener de încredere în drumul tău spre o viață mai sănătoasă și mai echilibrată. Creată de o echipă pasionată de fitness, tehnologie și dezvoltare personală, platforma noastră a fost concepută cu gândul la nevoile reale ale celor care vor să-și atingă obiectivele fizice într-un mod organizat și motivant.</p>
+
+    <h3>🎯 Misiunea noastră</h3>
+    <p style="text-indent: 30px;">Ne propunem să democratizăm progresul în fitness: fie că ești la primul tău antrenament sau ești deja un sportiv experimentat, îți oferim instrumentele necesare pentru a progresa în ritmul tău. Vrem ca fiecare utilizator să se simtă ghidat, susținut și încurajat să-și depășească limitele.</p>
+
+    <h3>💡 Ce îți oferim</h3>
+    <ul>
+      <li>📅 Calendar interactiv pentru organizarea antrenamentelor tale</li>
+      <li>📈 Progress Tracker pentru a-ți vizualiza evoluția în timp real</li>
+      <li>📋 Planuri personalizate adaptate nivelului și scopului tău</li>
+      <li>🔐 Un mediu sigur, privat, fără reclame și fără distrageri inutile</li>
+    </ul>
+
+    <h3>🤝 Valorile noastre</h3>
+    <ul>
+      <li><strong>Autenticitate:</strong> Ne pasă de utilizatorii noștri și creăm funcționalități reale, nu doar „feature-uri cool”.</li>
+      <li><strong>Simplitate:</strong> Interfață curată, ușor de utilizat, adaptată tuturor nivelurilor.</li>
+      <li><strong>Progres constant:</strong> Credem în pași mici, făcuți cu regularitate – fără presiune, fără grăbire.</li>
+    </ul>
+
+    <h3>🌟 Vino alături de noi!</h3>
+  </section>
+
+  <!-- Container simplu -->
+  <div id="simpleContainer" style="display: none; position: fixed; top: 60px; left: 250px; width: calc(100% - 250px); height: calc(100% - 60px); background: #000; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); z-index: 1000; overflow-y: auto;">
+    <button id="closeSimpleContainer" style="position: absolute; top: 10px; right: 40px; background: none; border: none; color: white; font-size: 16px; cursor: pointer; transition: color 0.3s;">
+      ✖
+    </button>
+    <h2>Container Simplu</h2>
+    <p>Acesta este un container simplu afișat la clic.</p>
+  </div>
+
+  <!-- Include Footer -->
+  <div id="footer">
+    <footer>
+      <p>&copy; 2025 FitnessTracker. Toate drepturile rezervate.</p>
+    </footer>
+  </div>
+
+  <script>
+    async function loadComponent(id, filePath, callback) {
+      const element = document.getElementById(id);
+      try {
+        const response = await fetch(filePath);
+        if (response.ok) {
+          const content = await response.text();
+          element.innerHTML = content;
+          console.log(`Fișierul ${filePath} a fost încărcat cu succes.`);
+          if (callback) callback(); // Apelează callback-ul după încărcare
+        } else {
+          console.error(`Eroare la încărcarea fișierului ${filePath}: ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`Eroare la încărcarea fișierului ${filePath}:`, error);
+      }
+    }
+
+    // Încarcă bara laterală și inițializează scriptul pentru evenimentele de clic
+    loadComponent("baraLaterala", "baraLaterala/bara.html", function () {
+      const menuButton = document.getElementById('menuButton');
+      const sidebar = document.getElementById('sidebar');
+
+      if (menuButton && sidebar) {
+        menuButton.addEventListener('click', function () {
+          sidebar.classList.toggle('active'); // Activează/dezactivează bara laterală
+        });
+      } else {
+        console.error('Elementele menuButton sau sidebar nu au fost găsite.');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      if (!userData) {
+        // Redirecționează utilizatorul la pagina de autentificare dacă nu este logat
+        window.location.href = "autentificarea/auth.html";
+      } else {
+        const usernameElement = document.getElementById('username');
+        const sidebarUsername = document.getElementById('sidebarUsername');
+        if (usernameElement) {
+          usernameElement.textContent = userData.username || "Nume Utilizator"; // Afișează numele utilizatorului
+        }
+        if (sidebarUsername) {
+          sidebarUsername.textContent = userData.username || "Nume Utilizator"; // Afișează numele utilizatorului în bara laterală
+        }
+
+        // Încarcă antrenamentele salvate pentru utilizatorul curent
+        const savedTrainings = JSON.parse(localStorage.getItem(`trainings_${userData.email}`)) || [];
+        const trainingList = document.getElementById('trainingList');
+
+        savedTrainings.forEach(training => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${training.exercise} - ${training.sets}`;
+          trainingList.appendChild(listItem);
+        });
+      }
+
+      // Atașează evenimentul submit pentru formularul de antrenamente
+      const trainingForm = document.getElementById('trainingForm');
+      if (trainingForm) {
+        trainingForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          const workoutType = document.getElementById('workoutType').value;
+          const exercise = document.getElementById('exercise').value.trim();
+          const sets = document.getElementById('sets').value.trim();
+          const trainingList = document.getElementById('trainingList');
+
+          if (workoutType && exercise && sets) {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${workoutType}: ${exercise} - ${sets}`;
+            trainingList.appendChild(listItem);
+
+            // Salvează antrenamentul în localStorage pentru utilizatorul curent
+            const savedTrainings = JSON.parse(localStorage.getItem(`trainings_${userData.email}`)) || [];
+            savedTrainings.push({ workoutType, exercise, sets, date: new Date().toISOString() }); // Adaugă data curentă
+            localStorage.setItem(`trainings_${userData.email}`, JSON.stringify(savedTrainings));
+
+            // Resetează formularul
+            trainingForm.reset();
+          } else {
+            alert("Te rugăm să completezi toate câmpurile!");
+          }
+        });
+      } else {
+        console.error("Formularul de antrenamente nu a fost găsit.");
+      }
+    });
+
+    document.getElementById('closeSimpleContainer').addEventListener('mouseover', function () {
+      this.style.color = '#007bff'; // Albastru la hover
+    });
+
+    document.getElementById('closeSimpleContainer').addEventListener('mouseout', function () {
+      this.style.color = 'white'; // Revine la alb
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarLinks = document.querySelectorAll('#sidebar a');
+      const contentFrame = document.getElementById('contentFrame');
+
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          const targetUrl = this.getAttribute('href');
+
+          // Resetează conținutul iframe-ului
+          if (contentFrame) {
+            contentFrame.src = targetUrl;
+          } else {
+            console.error('Iframe-ul nu a fost găsit.');
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarUsername = document.getElementById('sidebarUsername');
+      const currentUser = JSON.parse(localStorage.getItem('currentUser')); // Preia utilizatorul autentificat
+
+      if (currentUser && currentUser.username) {
+        sidebarUsername.textContent = currentUser.username; // Afișează numele utilizatorului conectat
+      } else {
+        sidebarUsername.textContent = "Nume Utilizator"; // Valoare implicită
+      }
+    });
+  </script>
+  <script src="baraLaterala/bara.js"></script>
+  <script src="Logout/logout.js"></script>
+</body>
+</html>

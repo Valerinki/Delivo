@@ -1,0 +1,139 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #002244, #004488); /* Gradient similar */
+  margin: 0;
+  padding: 0;
+  color: #ffffff; /* Text alb */
+}
+
+.plans-container {
+  max-width: 700px; /* Lățime similară */
+  margin: 50px auto;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.8); /* Fundal translucid */
+  border-radius: 15px; /* Colțuri rotunjite */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Umbră mai pronunțată */
+}
+
+#plansContainer {
+  position: fixed;
+  top: 60px;
+  left: 250px;
+  width: calc(100% - 250px);
+  height: calc(100% - 60px);
+  background: rgba(0, 0, 0, 0.85); /* Fundal translucid */
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  overflow-y: auto;
+  display: none; /* Ascuns implicit */
+}
+
+h2 {
+  text-align: center;
+  color: #00d4ff; /* Culoare evidențiată pentru titlu */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Umbră pentru text */
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15); /* Fundal translucid */
+  color: #ffffff;
+  font-size: 1rem;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4); /* Umbră pentru input */
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+input[type="text"]:focus {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Umbră mai mare la focus */
+  transform: scale(1.02); /* Efect de mărire */
+  outline: none;
+}
+
+button {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #0077cc, #00aaff); /* Gradient atractiv */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4); /* Umbră pentru buton */
+  font-size: 1rem;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #0056b3, #0077cc); /* Gradient mai închis la hover */
+  transform: translateY(-3px); /* Efect de ridicare */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Umbră mai mare la hover */
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plan-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: rgba(0, 51, 102, 0.8); /* Fundal translucid */
+  border: 1px solid rgba(0, 51, 102, 0.5); /* Bordură translucidă */
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Umbră pentru evidențiere */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.plan-item:hover {
+  transform: scale(1.05); /* Efect de mărire la hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Umbră mai mare la hover */
+}
+
+.plan-item label {
+  flex: 1;
+  cursor: pointer;
+}
+
+.plan-item label.completed {
+  text-decoration: line-through;
+  color: #39ff14; /* Verde neon pentru obiective realizate */
+}
+
+.checkbox {
+  margin-left: 10px;
+  transform: scale(1.2); /* Mărim dimensiunea checkbox-ului */
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.2s;
+}
+
+close-button:hover {
+  color: #ff0000; /* Roșu la hover */
+  transform: scale(1.2); /* Mărire la hover */
+}

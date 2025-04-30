@@ -1,0 +1,46 @@
+#calendarContainer {
+  position: fixed;
+  top: 60px;
+  left: 250px;
+  width: calc(100% - 250px);
+  height: calc(100% - 60px);
+  background: #1e1e1e;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow-y: auto;
+  display: none;
+}
+
+#calendarContainer button.close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#calendarContainer button.close-button:hover {
+  color: #007bff;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7 coloane pentru zilele săptămânii */
+  text-align: center;
+  font-weight: bold;
+  background-color: #003366; /* Fundal albastru */
+  color: #ffffff; /* Text alb */
+  padding: 10px 0;
+  border-radius: 8px 8px 0 0; /* Colțuri rotunjite de sus */
+}
+
+.weekdays span {
+  padding: 5px;
+}

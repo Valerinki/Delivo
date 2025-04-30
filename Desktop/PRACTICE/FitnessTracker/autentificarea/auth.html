@@ -1,55 +1,70 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Autentificare - Fitness Tracer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autentificare</title>
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif; /* Aplică fontul Poppins */
+    }
+  </style>
 </head>
 <body>
-<h2>Autentificare</h2>
-<form id="loginForm">
-<div>
-<label for="email">Email:</label>
-<input type="email" id="email" name="email" required>
-</div>
-<div>
-<label for="password">Parolă:</label>
-<input type="password" id="password" name="password" required>
-</div>
-<button type="submit">Autentificare</button>
-<div id="error-message" style="color: red;"></div>
-</form>
-<p>Nu ai un cont? <a href="../registrarea/register.html">Înregistrează-te</a></p> 
-<script>
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        const errorMessageDiv = document.getElementById('error-message');
-
-        fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: email, password: password }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '../index.html';
-            } else {
-                errorMessageDiv.textContent = data.error;
-            }
-        })
-        .catch(error => {
-            console.error('Eroare la trimiterea cererii:', error);
-            errorMessageDiv.textContent = 'A apărut o eroare la autentificare.';
-        });
+  <div class="auth-container">
+    <h2 style="text-align: center; font-family: Bold Italic;">Autentificarea</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Parolă" required>
+      <button type="submit">Autentifică-te</button>
+      <p id="error" class="error-message"></p>
+    </form>
+    <p style="text-align: center;">Nu ai un cont? <a href="../registrarea/register.html">Înregistrează-te</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!localStorage.getItem('users')) {
+        try {
+          const response = await fetch('../users.json');
+          if (response.ok) {
+            const users = await response.json();
+            localStorage.setItem('users', JSON.stringify(users));
+          } else {
+            console.error('Eroare la încărcarea utilizatorilor:', response.status);
+          }
+        } catch (error) {
+          console.error('Eroare la încărcarea utilizatorilor:', error);
+        }
+      }
     });
-</script>
+
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorElement = document.getElementById('error');
+
+      try {
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.email === email && u.password === password);
+
+        if (user) {
+          localStorage.setItem('userData', JSON.stringify(user)); // Salvează utilizatorul logat
+          alert('Autentificare reușită!');
+          window.location.href = "../main.html"; // Redirecționează la pagina principală
+        } else {
+          errorElement.textContent = 'Email sau parolă incorectă.';
+          errorElement.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Eroare la autentificare:', error);
+        errorElement.textContent = 'Eroare la autentificare. Verificați conexiunea.';
+        errorElement.style.display = 'block';
+      }
+    });
+  </script>
 </body>
 </html>
-```
