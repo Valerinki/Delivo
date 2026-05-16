@@ -21,16 +21,81 @@ namespace Delivo.Forms
             };
             EnableDoubleBuffer(root);
 
+            // ── Top block: titlu + toolbar ────────────────────────────
+            var topBlock = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 120,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0, 0, 0, 12)
+            };
+
             var lblTitle = CreateSectionTitle("📦  Gestionare comenzi");
             lblTitle.Dock = DockStyle.Top;
-            lblTitle.Height = 64;
+            lblTitle.Height = 52;
+
+            // ── Toolbar card ──────────────────────────────────────────
+            var toolbarPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 56,
+                BackColor = ColorAlbastruCard,
+                Padding = new Padding(16, 0, 16, 0)
+            };
+            WireRoundedCardPaint(toolbarPanel, 14);
+            toolbarPanel.Resize += (_, _) => ApplyRoundedRegion(toolbarPanel, 14);
+
+            var flow = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0)
+            };
+
+            void AddCentered(Control c, int rightMargin = 10)
+            {
+                c.Margin = new Padding(0, (56 - c.Height) / 2, rightMargin, 0);
+                flow.Controls.Add(c);
+            }
+
+            var btnRefresh = CreateSecondaryGhostButton("↻  Refresh", 130);
+            btnRefresh.Height = 36;
+            btnRefresh.Click += (_, _) => LoadComenzi();
+
+            // Informație utilă în toolbar
+            var lblInfo = new Label
+            {
+                Text = "💡  Poți modifica statusul comenzii direct din coloana Status din tabel",
+                Font = UiFont(10f),
+                ForeColor = ColorTextSecundar,
+                AutoSize = true,
+                BackColor = Color.Transparent
+            };
+            lblInfo.Margin = new Padding(16, (56 - 20) / 2, 0, 0);
+
+            AddCentered(btnRefresh, 16);
+            flow.Controls.Add(lblInfo);
+            toolbarPanel.Controls.Add(flow);
+
+            topBlock.Controls.Add(toolbarPanel);
+            topBlock.Controls.Add(lblTitle);
+
+            // ── Body ──────────────────────────────────────────────────
+            var body = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.Transparent
+            };
 
             try
             {
                 var comenzi = DatabaseHelper.GetComenzi();
+
                 if (comenzi.Count == 0)
                 {
-                    root.Controls.Add(BuildOrdersEmptyState());
+                    body.Controls.Add(BuildOrdersEmptyState());
                 }
                 else
                 {
@@ -107,14 +172,12 @@ namespace Delivo.Forms
                         }
                     };
 
-                    var body = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
                     DockGridFullWidth(dgv, body);
-                    root.Controls.Add(body);
                 }
             }
             catch (Exception ex)
             {
-                root.Controls.Add(new Label
+                body.Controls.Add(new Label
                 {
                     Text = "Eroare la încărcarea comenzilor: " + ex.Message,
                     ForeColor = ColorDanger,
@@ -125,7 +188,8 @@ namespace Delivo.Forms
                 });
             }
 
-            root.Controls.Add(lblTitle);
+            root.Controls.Add(body);
+            root.Controls.Add(topBlock);
             pnlContent.Controls.Add(root);
         }
 
@@ -153,60 +217,72 @@ namespace Delivo.Forms
             var wrap = new Panel
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.Transparent,
-                Padding = new Padding(24, 48, 24, 24)
+                BackColor = Color.Transparent
             };
+            EnableDoubleBuffer(wrap);
 
-            var inner = new Panel
+            var card = new Panel
             {
-                Size = new Size(560, 300),
-                BackColor = ColorAlbastruCard
+                Size = new Size(520, 260),
+                BackColor = ColorAlbastruCard,
+                Padding = new Padding(40, 36, 40, 36)
             };
-            WireRoundedCardPaint(inner, 20);
-            inner.Resize += (_, _) => ApplyRoundedRegion(inner, 20);
+            WireRoundedCardPaint(card, 20);
+            card.Resize += (_, _) => ApplyRoundedRegion(card, 20);
 
-            var icon = new Label
+            var lblIcon = new Label
             {
                 Text = "📭",
-                Font = UiFont(48f),
-                AutoSize = true,
-                Location = new Point(252, 40),
+                Font = UiFont(44f),
+                AutoSize = false,
+                Size = new Size(440, 64),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(40, 28),
                 BackColor = Color.Transparent
             };
 
-            var lbl = new Label
+            // Linie separator sub icon
+            var sep = new Panel
+            {
+                Size = new Size(440, 1),
+                Location = new Point(40, 104),
+                BackColor = Color.FromArgb(40, 255, 255, 255)
+            };
+
+            var lblMain = new Label
             {
                 Text = "Nu există comenzi momentan",
-                Font = UiFont(20f, FontStyle.Bold),
+                Font = UiFont(18f, FontStyle.Bold),
                 ForeColor = ColorAlb,
                 AutoSize = false,
-                Size = new Size(520, 40),
+                Size = new Size(440, 40),
                 TextAlign = ContentAlignment.MiddleCenter,
-                Location = new Point(20, 120),
+                Location = new Point(40, 116),
                 BackColor = Color.Transparent
             };
 
-            var sub = new Label
+            var lblSub = new Label
             {
-                Text = "Comenzile clienților vor apărea aici.\nPoți modifica statusul direct din tabel.",
-                Font = UiFont(11f),
+                Text = "Comenzile plasate de clienți vor apărea aici.\nStatusul poate fi modificat direct din tabel.",
+                Font = UiFont(10.5f),
                 ForeColor = ColorTextSecundar,
                 AutoSize = false,
-                Size = new Size(480, 60),
+                Size = new Size(440, 52),
                 TextAlign = ContentAlignment.TopCenter,
-                Location = new Point(40, 168),
+                Location = new Point(40, 164),
                 BackColor = Color.Transparent
             };
 
-            inner.Controls.Add(icon);
-            inner.Controls.Add(lbl);
-            inner.Controls.Add(sub);
-            wrap.Controls.Add(inner);
+            card.Controls.Add(lblIcon);
+            card.Controls.Add(sep);
+            card.Controls.Add(lblMain);
+            card.Controls.Add(lblSub);
 
+            wrap.Controls.Add(card);
             wrap.Layout += (_, _) =>
             {
-                inner.Left = (wrap.ClientSize.Width - inner.Width) / 2;
-                inner.Top = (wrap.ClientSize.Height - inner.Height) / 2;
+                card.Left = Math.Max(0, (wrap.ClientSize.Width - card.Width) / 2);
+                card.Top = Math.Max(0, (wrap.ClientSize.Height - card.Height) / 2);
             };
 
             return wrap;

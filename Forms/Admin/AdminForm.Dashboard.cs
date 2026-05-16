@@ -60,9 +60,9 @@ namespace Delivo.Forms
             var wrap = new Panel
             {
                 Width = 1100,
-                Height = 120,
+                Height = 88,
                 BackColor = Color.Transparent,
-                Margin = new Padding(0, 0, 0, 32)
+                Margin = new Padding(0, 0, 0, 12)
             };
 
             var lblMain = new Label
@@ -79,7 +79,7 @@ namespace Delivo.Forms
 
             var lblSub = new Label
             {
-                Text = $"Delivo Admin  ·  {DateTime.Now:dddd, dd MMMM yyyy}",
+                Text = $"Delivo Admin  ·  {DateTime.Now.ToString("dddd, dd MMMM yyyy", new System.Globalization.CultureInfo("ro-RO"))}",
                 Font = UiFont(12f),
                 ForeColor = ColorTextSecundar,
                 AutoSize = false,
@@ -115,7 +115,7 @@ namespace Delivo.Forms
                 Width = 1100,
                 Height = 188,
                 BackColor = Color.Transparent,
-                Margin = new Padding(0, 0, 0, 40)
+                Margin = new Padding(0, 0, 0, 16)
             };
             for (int i = 0; i < 4; i++)
                 table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
@@ -211,7 +211,8 @@ namespace Delivo.Forms
                 Width = 1100,
                 AutoSize = true,
                 BackColor = Color.Transparent,
-                Margin = new Padding(0, 8, 0, 0)
+                Margin = new Padding(0, 8, 0, 0),
+                Dock = DockStyle.Fill
             };
 
             var lbl = new Label
@@ -221,22 +222,30 @@ namespace Delivo.Forms
                 ForeColor = ColorAlb,
                 AutoSize = false,
                 Size = new Size(1100, 40),
-                TextAlign = ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleCenter, // centrează textul în interiorul label-ului
                 Margin = new Padding(0, 0, 0, 24)
             };
 
+            // Grid pentru butoanele de acțiuni rapide.
+            // Mărim lățimea coloanelor astfel încât titlurile să încapă pe un singur rând
+            // și ajustăm dimensiunile interne ca să nu apară tăieri la margini.
             var grid = new TableLayoutPanel
             {
                 ColumnCount = 2,
                 RowCount = 3,
-                Width = 1100,
+                Width = 940,
                 AutoSize = true,
                 BackColor = Color.Transparent
             };
-            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
-            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+            grid.ColumnStyles.Clear();
+            // coloane mai late pentru a evita înfășurarea textului pe două rânduri
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 460f));
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 460f));
+            // reduc înălțimea rândurilor (mai puțin în înălțime)
             for (int r = 0; r < 3; r++)
-                grid.RowStyles.Add(new RowStyle(SizeType.Absolute, 120f));
+                grid.RowStyles.Add(new RowStyle(SizeType.Absolute, 130f));
+            // padding intern pentru spațiere egală
+            grid.Padding = new Padding(12, 0, 12, 0);
 
             var actions = new[]
             {
@@ -252,7 +261,8 @@ namespace Delivo.Forms
                 var a = actions[i];
                 int col = i % 2;
                 int row = i / 2;
-                var cellHost = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10, 6, 10, 6), BackColor = Color.Transparent };
+                // fiecare celulă are margină moderată pentru spațiere consistentă (nu exagerăm ca să nu provoace overflow)
+                var cellHost = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10, 6, 10, 6), BackColor = Color.Transparent, Margin = new Padding(8) };
                 cellHost.Controls.Add(BuildQuickActionCard(a.Item1, a.Item2, a.Item3, a.Item4));
                 grid.Controls.Add(cellHost, col, row);
             }
@@ -262,65 +272,110 @@ namespace Delivo.Forms
                 FlowDirection = FlowDirection.TopDown,
                 WrapContents = false,
                 AutoSize = true,
-                Width = 1100,
+                Width = grid.Width,
                 BackColor = Color.Transparent
             };
+            // make heading the same width as the grid so it appears centered above the cards
+            lbl.Size = new Size(grid.Width, lbl.Height);
             inner.Controls.Add(lbl);
             inner.Controls.Add(grid);
-            block.Controls.Add(inner);
+
+            // Centrare reală: un wrapper cu Dock=Fill care centrează inner
+            var centerWrapper = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.Transparent,
+                AutoSize = true
+            };
+
+            void CenterInner(object? s, EventArgs e)
+            {
+                inner.Left = Math.Max(0, (centerWrapper.ClientSize.Width - inner.Width) / 2);
+            }
+
+            centerWrapper.Resize += CenterInner;
+            centerWrapper.Controls.Add(inner);
+            block.Controls.Add(centerWrapper);
+
+            // Forțează după render
+            block.HandleCreated += CenterInner;
 
             return block;
         }
 
         private Panel BuildQuickActionCard(string icon, string title, string subtitle, Action onClick)
         {
+            // Construiește un card de acțiune rapidă:
+            // - pictograma este poziționată în stânga,
+            // - titlul și subtitlul sunt stivuite vertical în dreapta,
+            // - cardurile sunt mai late și mai puțin înalte pentru un aspect compact.
             var card = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = ColorAlbastruCard,
                 Cursor = Cursors.Hand,
-                Padding = new Padding(22, 16, 22, 16)
+                Padding = new Padding(16, 12, 16, 12),
+                MinimumSize = new Size(400, 100) // asigurat <= lățimea coloanei (420)
             };
             WireRoundedCardPaint(card, 16);
             card.Resize += (_, _) => ApplyRoundedRegion(card, 16);
 
+            // Pictograma, fixată în stânga.
+            // pictograma puțin mai mică
+            // pictograma puțin mai mică pentru a nu ocupa prea mult spațiu orizontal
             var lblIcon = new Label
             {
                 Text = icon,
-                Font = UiFont(26f),
+                Font = UiFont(22f),
                 AutoSize = true,
-                Location = new Point(20, 14),
+                Location = new Point(18, 24),
                 BackColor = Color.Transparent,
                 ForeColor = ColorPortocaliu
+            };
+
+            // Containerul din dreapta care conține titlul și subtitlul.
+            // mărim spațiul dintre pictogramă și text prin mutarea containerului la dreapta
+            // plasează containerul de text mai aproape de pictogramă, dar suficient de lat
+            // astfel încât să nu depășească lățimea coloanei
+            var rightPanel = new Panel
+            {
+                BackColor = Color.Transparent,
+                Location = new Point(100, 12),
+                Size = new Size(320, 96),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
             var lblTitle = new Label
             {
                 Text = title,
-                Font = UiFont(13f, FontStyle.Bold),
+                Font = UiFont(15f, FontStyle.Bold),
                 ForeColor = ColorAlb,
                 AutoSize = true,
-                Location = new Point(64, 16),
+                Location = new Point(0, 6),
                 BackColor = Color.Transparent
             };
 
             var lblSub = new Label
             {
                 Text = subtitle,
-                Font = UiFont(10f),
+                Font = UiFont(11f),
                 ForeColor = ColorTextSecundar,
                 AutoSize = true,
-                Location = new Point(64, 42),
-                MaximumSize = new Size(380, 0),
+                Location = new Point(0, 34),
+                MaximumSize = new Size(320, 0), // limitează lățimea pentru a nu depăși cardul
                 BackColor = Color.Transparent
             };
 
+            rightPanel.Controls.Add(lblTitle);
+            rightPanel.Controls.Add(lblSub);
+
             card.Controls.Add(lblIcon);
-            card.Controls.Add(lblTitle);
-            card.Controls.Add(lblSub);
+            card.Controls.Add(rightPanel);
 
             Color normal = ColorAlbastruCard;
             Color hover = Color.FromArgb(255, 32, 48, 88);
+
+            // Leagă evenimentele pentru întregul card și pentru subcontroale.
             void Wire(Control c)
             {
                 c.Cursor = Cursors.Hand;
@@ -329,7 +384,7 @@ namespace Delivo.Forms
                 c.MouseLeave += (_, _) => card.BackColor = normal;
             }
 
-            foreach (Control c in new Control[] { card, lblIcon, lblTitle, lblSub })
+            foreach (Control c in new Control[] { card, lblIcon, rightPanel, lblTitle, lblSub })
                 Wire(c);
 
             return card;

@@ -44,27 +44,18 @@ namespace Delivo.Forms
 
         public AdminForm()
         {
-            EnableDoubleBuffer(this);
+            System.Diagnostics.Debug.WriteLine("=== AdminForm constructor START ===");
             BuildUI();
+            System.Diagnostics.Debug.WriteLine("=== BuildUI done ===");
             LoadDashboard();
+            System.Diagnostics.Debug.WriteLine("=== LoadDashboard done ===");
         }
 
         private void SetActiveNavButton(Button btn)
         {
-            foreach (var b in _navButtons)
-            {
-                b.BackColor = Color.Transparent;
-                b.ForeColor = ColorTextSecundar;
-                b.FlatAppearance.BorderSize = 0;
-                b.Padding = new Padding(50, 0, 12, 0);
-            }
-
             currentNavButton = btn;
-            btn.BackColor = ColorPortocaliuGlow;
-            btn.ForeColor = ColorPortocaliu;
-            btn.FlatAppearance.BorderColor = ColorPortocaliu;
-            btn.FlatAppearance.BorderSize = 1;
-            btn.Padding = new Padding(54, 0, 12, 0);
+            foreach (var b in _navButtons)
+                b.Invalidate();
         }
 
         private void NavigateToSection(int index, ProductListFocus productFocus = ProductListFocus.None)
@@ -72,12 +63,26 @@ namespace Delivo.Forms
             if (index >= 0 && index < _navButtons.Count)
                 SetActiveNavButton(_navButtons[index]);
 
-            switch (index)
+            // ✅ Suspendă desenarea completă în timpul navigării
+            pnlContent.SuspendLayout();
+            this.SuspendLayout();
+
+            try
             {
-                case 0: LoadDashboard(); break;
-                case 1: LoadProduse(productFocus); break;
-                case 2: LoadComenzi(); break;
-                case 3: LoadUtilizatori(); break;
+                switch (index)
+                {
+                    case 0: LoadDashboard(); break;
+                    case 1: LoadProduse(productFocus); break;
+                    case 2: LoadComenzi(); break;
+                    case 3: LoadUtilizatori(); break;
+                }
+            }
+            finally
+            {
+                // ✅ Redesenează o singură dată după ce totul e gata
+                pnlContent.ResumeLayout(true);
+                this.ResumeLayout(true);
+                pnlContent.Refresh();
             }
         }
     }

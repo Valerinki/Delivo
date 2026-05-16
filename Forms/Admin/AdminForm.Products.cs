@@ -97,60 +97,71 @@ namespace Delivo.Forms
 
             var lblTitle = CreateSectionTitle("🍕  Catalog produse");
             lblTitle.Dock = DockStyle.Top;
-            lblTitle.Height = 56;
+            lblTitle.Height = 52;
 
-            var row = new FlowLayoutPanel
+            // ── Bara de filtre + acțiuni ──────────────────────────────
+            var toolbarPanel = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 64,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = true,
-                Padding = new Padding(0, 10, 0, 0),
-                BackColor = Color.Transparent
+                Height = 56,
+                BackColor = ColorAlbastruCard,
+                Padding = new Padding(16, 0, 16, 0),
+                Margin = new Padding(0, 0, 0, 12)
             };
+            WireRoundedCardPaint(toolbarPanel, 14);
+            toolbarPanel.Resize += (_, _) => ApplyRoundedRegion(toolbarPanel, 14);
 
             var lblMsg = new Label
             {
                 AutoSize = true,
                 ForeColor = ColorDanger,
                 Font = UiFont(10f, FontStyle.Bold),
-                Margin = new Padding(16, 16, 0, 0),
                 Visible = false,
-                MaximumSize = new Size(600, 0)
+                MaximumSize = new Size(400, 0)
             };
 
+            // ── Search box ────────────────────────────────────────────
             var txtSearch = CreateStyledTextBox();
-            txtSearch.PlaceholderText = "Caută după nume…";
-            txtSearch.Width = 340;
-            txtSearch.Margin = new Padding(0, 4, 14, 0);
+            txtSearch.PlaceholderText = "🔍  Caută după nume…";
+            txtSearch.Width = 260;
+            txtSearch.Height = 36;
 
+            // ── Combo categorii ───────────────────────────────────────
             var cmbCat = CreateStyledCombo();
-            cmbCat.Width = 250;
-            cmbCat.Margin = new Padding(0, 4, 14, 0);
+            cmbCat.Width = 200;
+            cmbCat.Height = 36;
             cmbCat.Items.Add("Toate categoriile");
             foreach (var c in DatabaseHelper.GetCategorii())
                 cmbCat.Items.Add(c.Nume);
             cmbCat.SelectedIndex = 0;
 
-            var btnRefresh = CreateSecondaryGhostButton("↻  Refresh", 150);
-            btnRefresh.Margin = new Padding(6, 4, 6, 0);
+            // ── Separator vertical ────────────────────────────────────
+            var sepV = new Panel
+            {
+                Width = 1,
+                BackColor = Color.FromArgb(40, 255, 255, 255)
+            };
+
+            // ── Butoane acțiuni ───────────────────────────────────────
+            var btnRefresh = CreateSecondaryGhostButton("↻  Refresh", 130);
+            btnRefresh.Height = 36;
             btnRefresh.Click += (_, _) => LoadProduse(ProductListFocus.None);
 
-            var btnAdd = CreatePrimaryOrangeButton("➕  Adaugă", 170);
-            btnAdd.Margin = new Padding(6, 4, 6, 0);
+            var btnAdd = CreatePrimaryOrangeButton("➕  Adaugă", 150);
+            btnAdd.Height = 36;
             btnAdd.Click += (_, _) =>
             {
                 SetActiveNavButton(_navButtons[1]);
                 ShowProductForm(ProductFormMode.Add);
             };
 
-            var btnEdit = CreateSecondaryGhostButton("✏️  Modifică", 170);
-            btnEdit.Margin = new Padding(6, 4, 6, 0);
+            var btnEdit = CreateSecondaryGhostButton("✏️  Modifică", 150);
+            btnEdit.Height = 36;
             btnEdit.Click += (_, _) =>
             {
                 if (!TryGetSelectedProductId(dgv, out var id, out _))
                 {
-                    lblMsg.Text = "Selectează un produs din tabel pentru modificare.";
+                    lblMsg.Text = "Selectează un produs pentru modificare.";
                     lblMsg.Visible = true;
                     return;
                 }
@@ -158,13 +169,13 @@ namespace Delivo.Forms
                 ShowProductForm(ProductFormMode.Edit, id);
             };
 
-            var btnDel = CreateSecondaryGhostButton("🗑️  Șterge", 160);
-            btnDel.Margin = new Padding(6, 4, 6, 0);
+            var btnDel = CreateSecondaryGhostButton("🗑️  Șterge", 140);
+            btnDel.Height = 36;
             btnDel.Click += (_, _) =>
             {
                 if (!TryGetSelectedProductId(dgv, out var id, out var nume))
                 {
-                    lblMsg.Text = "Selectează un produs din tabel pentru ștergere.";
+                    lblMsg.Text = "Selectează un produs pentru ștergere.";
                     lblMsg.Visible = true;
                     return;
                 }
@@ -172,33 +183,73 @@ namespace Delivo.Forms
                 ShowDeleteProductPanel(bodyPanel, dgv, id, nume);
             };
 
+            // ── Layout intern toolbar: tot centrat vertical ───────────
+            toolbarPanel.Paint += (_, e) => { }; // trigger double buffer
+
+            // Folosim un FlowLayoutPanel cu aliniere verticală centrată
+            var flow = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0)
+            };
+
+            // Helper: centrează vertical orice control în flow de 56px
+            void AddCentered(Control c, int rightMargin = 10)
+            {
+                c.Margin = new Padding(0, (56 - c.Height) / 2, rightMargin, 0);
+                flow.Controls.Add(c);
+            }
+
+            AddCentered(txtSearch, 10);
+            AddCentered(cmbCat, 16);
+
+            // Separator vertical manual
+            sepV.Height = 32;
+            sepV.Margin = new Padding(0, (56 - 32) / 2, 16, 0);
+            flow.Controls.Add(sepV);
+
+            AddCentered(btnRefresh, 8);
+            AddCentered(btnAdd, 8);
+            AddCentered(btnEdit, 8);
+            AddCentered(btnDel, 0);
+
+            toolbarPanel.Controls.Add(flow);
+
+            // ── Mesaj eroare sub toolbar ──────────────────────────────
+            var msgPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 28,
+                BackColor = Color.Transparent
+            };
+            lblMsg.Location = new Point(4, 4);
+            msgPanel.Controls.Add(lblMsg);
+
             void ApplyFilters()
             {
                 string q = txtSearch.Text.Trim().ToLowerInvariant();
                 string? cat = cmbCat.SelectedIndex <= 0 ? null : cmbCat.SelectedItem?.ToString();
-                foreach (DataGridViewRow row in dgv.Rows)
+                foreach (DataGridViewRow r in dgv.Rows)
                 {
-                    if (row.IsNewRow) continue;
-                    var nume = row.Cells["Nume"].Value?.ToString() ?? "";
-                    var categorie = row.Cells["Categorie"].Value?.ToString() ?? "";
+                    if (r.IsNewRow) continue;
+                    var nume = r.Cells["Nume"].Value?.ToString() ?? "";
+                    var categorie = r.Cells["Categorie"].Value?.ToString() ?? "";
                     bool okName = string.IsNullOrEmpty(q) || nume.ToLowerInvariant().Contains(q);
                     bool okCat = cat == null || categorie.Equals(cat, StringComparison.OrdinalIgnoreCase);
-                    row.Visible = okName && okCat;
+                    r.Visible = okName && okCat;
                 }
             }
 
             txtSearch.TextChanged += (_, _) => ApplyFilters();
             cmbCat.SelectedIndexChanged += (_, _) => ApplyFilters();
 
-            row.Controls.Add(txtSearch);
-            row.Controls.Add(cmbCat);
-            row.Controls.Add(btnRefresh);
-            row.Controls.Add(btnAdd);
-            row.Controls.Add(btnEdit);
-            row.Controls.Add(btnDel);
-            row.Controls.Add(lblMsg);
-
-            bar.Controls.Add(row);
+            // ── Asamblare ─────────────────────────────────────────────
+            // Ordinea în DockStyle.Top: ultimul adăugat = primul sus
+            bar.Controls.Add(msgPanel);
+            bar.Controls.Add(toolbarPanel);
             bar.Controls.Add(lblTitle);
             topBlock.Controls.Add(bar);
         }
@@ -309,54 +360,86 @@ namespace Delivo.Forms
         private void ShowProductForm(ProductFormMode mode, int? productId = null)
         {
             DisposePnlContentChildren();
-            pnlContent.Padding = new Padding(24, 18, 24, 24);
+            pnlContent.Padding = new Padding(0); // ✅ fără padding exterior
 
+            // ── Shell full-fill, fără AutoScroll ──────────────────────
             var shell = new Panel
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.Transparent,
-                AutoScroll = true
+                BackColor = Color.Transparent
             };
             EnableDoubleBuffer(shell);
 
+            // ── Card central ──────────────────────────────────────────
             var card = new Panel
             {
-                Width = 720,
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Width = 680,
+                Height = 620,                          // ✅ înălțime fixă — fără scroll
                 BackColor = ColorAlbastruCard,
-                Padding = new Padding(46, 40, 46, 40)
+                Padding = new Padding(48, 36, 48, 36)
             };
             WireRoundedCardPaint(card, 22);
             card.Resize += (_, _) => ApplyRoundedRegion(card, 22);
 
+            // ── Header card ───────────────────────────────────────────
+            var lblHead = new Label
+            {
+                Text = mode == ProductFormMode.Add ? "➕  Produs nou" : "✏️  Modifică produs",
+                Font = UiFont(22f, FontStyle.Bold),
+                ForeColor = ColorAlb,
+                AutoSize = false,
+                Size = new Size(584, 48),
+                Location = new Point(48, 28),
+                TextAlign = ContentAlignment.MiddleCenter,  // ✅ centrat
+                BackColor = Color.Transparent
+            };
+
+            var sep = new Panel
+            {
+                Size = new Size(584, 1),
+                Location = new Point(48, 84),
+                BackColor = Color.FromArgb(40, 255, 255, 255)
+            };
+
+            // ── Mesaj eroare ──────────────────────────────────────────
             var lblErr = new Label
             {
                 ForeColor = ColorDanger,
                 Font = UiFont(10f, FontStyle.Bold),
-                AutoSize = true,
+                AutoSize = false,
+                Size = new Size(584, 24),
+                Location = new Point(48, 92),
+                TextAlign = ContentAlignment.MiddleCenter,
                 Visible = false,
-                MaximumSize = new Size(620, 0)
+                BackColor = Color.Transparent
             };
 
-            var lblHead = new Label
+            // ── Grid 2 coloane: label | input ─────────────────────────
+            var tlp = new TableLayoutPanel
             {
-                Text = mode == ProductFormMode.Add ? "➕  Produs nou" : "✏️  Modifică produs",
-                Font = UiFont(24f, FontStyle.Bold),
-                ForeColor = ColorAlb,
-                AutoSize = true,
-                Margin = new Padding(0, 0, 0, 20)
+                Size = new Size(584, 380),
+                Location = new Point(48, 120),
+                ColumnCount = 2,
+                RowCount = 4,
+                BackColor = Color.Transparent,
+                CellBorderStyle = TableLayoutPanelCellBorderStyle.None
             };
+            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140f));
+            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            for (int i = 0; i < 4; i++)
+                tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 72f));
 
+            // ── Câmpuri ───────────────────────────────────────────────
             var txtNume = CreateStyledTextBox();
-            txtNume.Height = 48;
+            txtNume.Height = 44;
+
             var nudPret = new NumericUpDown
             {
                 DecimalPlaces = 2,
                 Maximum = 999999,
                 Minimum = 0,
                 Increment = 0.5M,
-                Height = 48,
+                Height = 44,
                 BackColor = ColorInputBg,
                 ForeColor = ColorAlb,
                 Font = UiFont(11f),
@@ -365,47 +448,39 @@ namespace Delivo.Forms
             };
 
             var cmbCat = CreateStyledCombo();
+            cmbCat.Height = 44;
             foreach (var c in DatabaseHelper.GetCategorii())
                 cmbCat.Items.Add(new CatItem(c.Id, c.Nume));
             if (cmbCat.Items.Count > 0) cmbCat.SelectedIndex = 0;
 
             var txtDesc = CreateStyledTextBox(multiline: true);
+            txtDesc.Height = 80;
 
-            var pic = new PictureBox
+            // Helper: adaugă label + control în grid
+            void AddRow(int row, string caption, Control ctrl)
             {
-                Size = new Size(260, 150),
-                SizeMode = PictureBoxSizeMode.Zoom,
-                BackColor = ColorInputBg,
-                BorderStyle = BorderStyle.FixedSingle
-            };
-
-            var btnImg = CreateSecondaryGhostButton("Alege imagine (previzualizare)", 320);
-            var lblImgNote = new Label
-            {
-                Text = "Imagine opțională — previzualizare locală (nu se salvează în baza de date).",
-                ForeColor = ColorTextSecundar,
-                Font = UiFont(9f),
-                AutoSize = true,
-                MaximumSize = new Size(480, 0)
-            };
-
-            btnImg.Click += (_, _) =>
-            {
-                using var ofd = new OpenFileDialog { Filter = "Imagini|*.png;*.jpg;*.jpeg;*.gif;*.bmp|Toate|*.*" };
-                if (ofd.ShowDialog() != DialogResult.OK) return;
-                try
+                var lbl = new Label
                 {
-                    pic.Image?.Dispose();
-                    pic.Image = Image.FromFile(ofd.FileName);
-                    lblErr.Visible = false;
-                }
-                catch (Exception ex)
-                {
-                    lblErr.Text = "Imaginea nu a putut fi încărcată: " + ex.Message;
-                    lblErr.Visible = true;
-                }
-            };
+                    Text = caption,
+                    Font = UiFont(10.5f, FontStyle.Bold),
+                    ForeColor = ColorTextSecundar,
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    BackColor = Color.Transparent,
+                    Margin = new Padding(0, 0, 16, 0)
+                };
+                ctrl.Dock = DockStyle.Fill;
+                ctrl.Margin = new Padding(0, 12, 0, 12);
+                tlp.Controls.Add(lbl, 0, row);
+                tlp.Controls.Add(ctrl, 1, row);
+            }
 
+            AddRow(0, "Nume produs", txtNume);
+            AddRow(1, "Preț (MDL)", nudPret);
+            AddRow(2, "Categorie", cmbCat);
+            AddRow(3, "Descriere", txtDesc);
+
+            // ── Precompletare la Edit ─────────────────────────────────
             if (mode == ProductFormMode.Edit && productId is int pid)
             {
                 var p = DatabaseHelper.GetProduseAdmin().FirstOrDefault(x => x.Id == pid);
@@ -427,79 +502,16 @@ namespace Delivo.Forms
                 }
             }
 
-            var tlp = new TableLayoutPanel
-            {
-                AutoSize = true,
-                ColumnCount = 2,
-                BackColor = Color.Transparent
-            };
-            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 180f));
-            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            // ── Butoane centrate ──────────────────────────────────────
+            var btnSave = CreatePrimaryOrangeButton("  Salvează", 180);
+            btnSave.Height = 48;
+            btnSave.Location = new Point(48 + 584 / 2 - 188, 516);   // centrat
 
-            int row = 0;
-            void AddField(string caption, Control field)
-            {
-                var cap = new Label
-                {
-                    Text = caption,
-                    Dock = DockStyle.Fill,
-                    Font = UiFont(11f, FontStyle.Bold),
-                    ForeColor = ColorTextSecundar,
-                    TextAlign = ContentAlignment.MiddleLeft,
-                    Margin = new Padding(0, 14, 16, 0)
-                };
-                field.Margin = new Padding(0, 10, 0, 0);
-                field.Dock = DockStyle.Fill;
-                tlp.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-                tlp.Controls.Add(cap, 0, row);
-                tlp.Controls.Add(field, 1, row);
-                row++;
-            }
+            var btnCancel = CreateSecondaryGhostButton("  Anulează", 160);
+            btnCancel.Height = 48;
+            btnCancel.Location = new Point(48 + 584 / 2 + 8, 516);
 
-            tlp.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            tlp.Controls.Add(lblHead, 0, row);
-            tlp.SetColumnSpan(lblHead, 2);
-            row++;
-
-            AddField("Nume produs", txtNume);
-            AddField("Preț (MDL)", nudPret);
-            AddField("Categorie", cmbCat);
-            AddField("Descriere", txtDesc);
-
-            var imgStack = new FlowLayoutPanel
-            {
-                FlowDirection = FlowDirection.TopDown,
-                AutoSize = true,
-                WrapContents = false,
-                BackColor = Color.Transparent
-            };
-            imgStack.Controls.Add(pic);
-            imgStack.Controls.Add(btnImg);
-            imgStack.Controls.Add(lblImgNote);
-            AddField("Imagine", imgStack);
-
-            tlp.Controls.Add(lblErr, 0, row);
-            tlp.SetColumnSpan(lblErr, 2);
-            row++;
-
-            var flpBtns = new FlowLayoutPanel
-            {
-                AutoSize = true,
-                FlowDirection = FlowDirection.LeftToRight,
-                Margin = new Padding(0, 28, 0, 0),
-                BackColor = Color.Transparent
-            };
-            var btnSave = CreatePrimaryOrangeButton("Salvează", 180);
-            btnSave.Height = 52;
-            var btnCancel = CreateSecondaryGhostButton("Anulează", 160);
-            btnCancel.Height = 52;
-            flpBtns.Controls.Add(btnSave);
-            flpBtns.Controls.Add(new Panel { Width = 16, Height = 10 });
-            flpBtns.Controls.Add(btnCancel);
-
-            tlp.Controls.Add(flpBtns, 0, row);
-            tlp.SetColumnSpan(flpBtns, 2);
-
+            // ── Logică butoane ────────────────────────────────────────
             btnCancel.Click += (_, _) => LoadProduse(ProductListFocus.None);
 
             btnSave.Click += (_, _) =>
@@ -539,15 +551,25 @@ namespace Delivo.Forms
                 LoadProduse(ProductListFocus.None);
             };
 
+            // ── Asamblare card ────────────────────────────────────────
+            card.Controls.Add(lblHead);
+            card.Controls.Add(sep);
+            card.Controls.Add(lblErr);
             card.Controls.Add(tlp);
-            shell.Controls.Add(card);
-            shell.Layout += (_, _) =>
-            {
-                card.Left = Math.Max(16, (shell.ClientSize.Width - card.Width) / 2);
-                card.Top = Math.Max(16, (shell.ClientSize.Height - card.Height) / 2);
-            };
+            card.Controls.Add(btnSave);
+            card.Controls.Add(btnCancel);
 
+            // ── Centrare card în shell ────────────────────────────────
+            void CenterCard(object? s, EventArgs e)
+            {
+                card.Left = Math.Max(24, (shell.ClientSize.Width - card.Width) / 2);
+                card.Top = Math.Max(24, (shell.ClientSize.Height - card.Height) / 2);
+            }
+            shell.Resize += CenterCard;
+            shell.HandleCreated += CenterCard;
+            shell.Controls.Add(card);
             pnlContent.Controls.Add(shell);
+            CenterCard(null, EventArgs.Empty);
         }
     }
 }

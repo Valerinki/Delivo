@@ -13,4 +13,10 @@
     <PackageReference Include="MySql.Data" Version="9.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Forms\Admin\AdminForm.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

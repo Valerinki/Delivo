@@ -21,7 +21,7 @@ namespace Delivo.Data
             return cmd.ExecuteScalar()?.ToString();
         }
 
-        public static bool InregistreazaUtilizator(string username, string parola, string numeComplet, string telefon = "")
+        public static bool InregistreazaUtilizator(string numeComplet, string username, string parola, string telefon = "", string email = "")
         {
             using var conn = GetConnection(); conn.Open();
             var cmdV = new MySqlCommand("SELECT COUNT(*) FROM Utilizatori WHERE NumeUtilizator=@u", conn);
@@ -29,11 +29,12 @@ namespace Delivo.Data
             if (Convert.ToInt32(cmdV.ExecuteScalar()) > 0) return false;
 
             var cmd = new MySqlCommand(
-                "INSERT INTO Utilizatori (NumeUtilizator,Parola,Rol,NumeComplet,Telefon) VALUES (@u,@p,'client',@n,@t)", conn);
+                "INSERT INTO Utilizatori (NumeUtilizator,Parola,Rol,NumeComplet,Telefon,Email) VALUES (@u,@p,'client',@n,@t,@e)", conn);
             cmd.Parameters.AddWithValue("@u", username);
             cmd.Parameters.AddWithValue("@p", parola);
             cmd.Parameters.AddWithValue("@n", numeComplet);
             cmd.Parameters.AddWithValue("@t", telefon);
+            cmd.Parameters.AddWithValue("@e", email);
             cmd.ExecuteNonQuery();
             return true;
         }
@@ -136,6 +137,25 @@ namespace Delivo.Data
             var cmd = new MySqlCommand(
                 "SELECT COUNT(*) FROM Utilizatori WHERE NumeUtilizator=@u", conn);
             cmd.Parameters.AddWithValue("@u", username);
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+        }
+        public static bool IsEmailTaken(string email)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand(
+                "SELECT COUNT(*) FROM Utilizatori WHERE Email=@e", conn);
+            cmd.Parameters.AddWithValue("@e", email);
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+        }
+
+        public static bool IsPhoneTaken(string telefon)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand(
+                "SELECT COUNT(*) FROM Utilizatori WHERE Telefon=@t", conn);
+            cmd.Parameters.AddWithValue("@t", telefon);
             return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 

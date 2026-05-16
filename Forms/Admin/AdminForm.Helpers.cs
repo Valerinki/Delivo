@@ -8,13 +8,20 @@ namespace Delivo.Forms
     {
         private void DisposePnlContentChildren()
         {
+            pnlContent.SuspendLayout();
+
+            // ✅ Dezabonează evenimentele înainte de dispose
             while (pnlContent.Controls.Count > 0)
             {
                 var c = pnlContent.Controls[0];
                 pnlContent.Controls.RemoveAt(0);
+                c.SuspendLayout();
                 c.Dispose();
             }
+
+            pnlContent.ResumeLayout(false);
         }
+
 
         private DataGridView CreatePremiumDataGridView(bool readOnly = true)
         {
@@ -30,7 +37,7 @@ namespace Delivo.Forms
                 MultiSelect = false,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 EnableHeadersVisualStyles = false,
-                GridColor = Color.FromArgb(34, 255, 255, 255),
+                GridColor = Color.FromArgb(255, 255, 255, 255),
                 RowTemplate = { Height = 62 },
                 DefaultCellStyle =
                 {
@@ -143,15 +150,42 @@ namespace Delivo.Forms
                 Text = text,
                 Size = new Size(width, 50),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = ColorPortocaliu,
-                ForeColor = ColorAlb,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Transparent,        // ✅ textul default ascuns
                 Font = UiFont(11.5f, FontStyle.Bold),
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseVisualStyleBackColor = false
             };
             b.FlatAppearance.BorderSize = 0;
-            b.FlatAppearance.MouseOverBackColor = ColorPortocaliuSoft;
-            ApplyRoundedRegion(b, 14);
-            b.Resize += (_, _) => ApplyRoundedRegion(b, 14);
+            b.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            b.FlatAppearance.MouseDownBackColor = Color.Transparent;
+
+            b.Paint += (_, e) =>
+            {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                e.Graphics.Clear(ColorAlbastruInchis); // ✅ șterge fundalul default
+
+                bool isHover = b.ClientRectangle.Contains(b.PointToClient(Cursor.Position));
+                Color bg = isHover ? ColorPortocaliuSoft : ColorPortocaliu;
+
+                var rect = new Rectangle(0, 0, b.Width - 1, b.Height - 1);
+                int r = 12;
+                using var path = new System.Drawing.Drawing2D.GraphicsPath();
+                path.AddArc(rect.X, rect.Y, r * 2, r * 2, 180, 90);
+                path.AddArc(rect.Right - r * 2, rect.Y, r * 2, r * 2, 270, 90);
+                path.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                path.CloseFigure();
+
+                using var brush = new SolidBrush(bg);
+                e.Graphics.FillPath(brush, path);
+
+                TextRenderer.DrawText(e.Graphics, b.Text, b.Font, b.ClientRectangle,
+                    ColorAlb, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            };
+
+            b.MouseEnter += (_, _) => b.Invalidate();
+            b.MouseLeave += (_, _) => b.Invalidate();
             return b;
         }
 
@@ -162,19 +196,51 @@ namespace Delivo.Forms
                 Text = text,
                 Size = new Size(width, 50),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(255, 20, 32, 62),
-                ForeColor = ColorAlb,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Transparent,        // ✅ textul default ascuns
                 Font = UiFont(11f, FontStyle.Bold),
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseVisualStyleBackColor = false
             };
-            b.FlatAppearance.BorderColor = Color.FromArgb(90, 255, 107, 0);
-            b.FlatAppearance.BorderSize = 1;
-            b.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 32, 44, 82);
-            ApplyRoundedRegion(b, 14);
-            b.Resize += (_, _) => ApplyRoundedRegion(b, 14);
+            b.FlatAppearance.BorderSize = 0;
+            b.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            b.FlatAppearance.MouseDownBackColor = Color.Transparent;
+
+            Color bgNormal = Color.FromArgb(255, 20, 32, 62);
+            Color bgHover = Color.FromArgb(255, 32, 44, 82);
+            Color border = Color.FromArgb(140, 255, 107, 0);
+
+            b.Paint += (_, e) =>
+            {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                e.Graphics.Clear(ColorAlbastruInchis); // ✅ șterge fundalul default
+
+                bool isHover = b.ClientRectangle.Contains(b.PointToClient(Cursor.Position));
+                Color bg = isHover ? bgHover : bgNormal;
+
+                var rect = new Rectangle(0, 0, b.Width - 1, b.Height - 1);
+                int r = 12;
+                using var path = new System.Drawing.Drawing2D.GraphicsPath();
+                path.AddArc(rect.X, rect.Y, r * 2, r * 2, 180, 90);
+                path.AddArc(rect.Right - r * 2, rect.Y, r * 2, r * 2, 270, 90);
+                path.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                path.CloseFigure();
+
+                using var brush = new SolidBrush(bg);
+                e.Graphics.FillPath(brush, path);
+
+                using var pen = new Pen(border, 1.5f);
+                e.Graphics.DrawPath(pen, path);
+
+                TextRenderer.DrawText(e.Graphics, b.Text, b.Font, b.ClientRectangle,
+                    ColorAlb, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            };
+
+            b.MouseEnter += (_, _) => b.Invalidate();
+            b.MouseLeave += (_, _) => b.Invalidate();
             return b;
         }
-
         private Label CreateSectionTitle(string text, ContentAlignment align = ContentAlignment.MiddleLeft)
         {
             return new Label
