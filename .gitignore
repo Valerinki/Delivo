@@ -1,3 +1,5 @@
 .vs/
 bin/
 obj/
+_buildout/
+_verify_build/
