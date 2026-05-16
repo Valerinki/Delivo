@@ -138,5 +138,104 @@ namespace Delivo.Data
             cmd.Parameters.AddWithValue("@u", username);
             return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
+
+        public static List<(int Id, string Nume)> GetCategorii()
+        {
+            var lista = new List<(int, string)>();
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand("SELECT Id,Nume FROM Categorii ORDER BY Nume", conn);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                lista.Add((r.GetInt32(0), r.GetString(1)));
+            return lista;
+        }
+
+        /// <summary>Toate produsele (inclusiv indisponibile) pentru panoul admin.</summary>
+        public static List<(int Id, string Nume, string Descriere, decimal Pret, string Categorie, int CategorieId, bool Disponibil)>
+            GetProduseAdmin()
+        {
+            var lista = new List<(int, string, string, decimal, string, int, bool)>();
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand(
+                "SELECT p.Id,p.Nume,p.Descriere,p.Pret,c.Nume,c.Id,p.Disponibil FROM Produse p JOIN Categorii c ON p.CategorieId=c.Id ORDER BY c.Nume,p.Nume",
+                conn);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                bool disp = true;
+                if (!r.IsDBNull(6))
+                {
+                    var v = r.GetValue(6);
+                    disp = v switch
+                    {
+                        bool b => b,
+                        byte b => b != 0,
+                        int i => i != 0,
+                        long l => l != 0,
+                        _ => Convert.ToInt32(v) != 0
+                    };
+                }
+
+                lista.Add((
+                    r.GetInt32(0),
+                    r.GetString(1),
+                    r.IsDBNull(2) ? "" : r.GetString(2),
+                    r.GetDecimal(3),
+                    r.GetString(4),
+                    r.GetInt32(5),
+                    disp));
+            }
+            return lista;
+        }
+
+        public static bool AdaugaProdus(string nume, string descriere, decimal pret, int categorieId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand(
+                "INSERT INTO Produse (Nume,Descriere,Pret,CategorieId,Disponibil) VALUES (@n,@d,@p,@c,1)",
+                conn);
+            cmd.Parameters.AddWithValue("@n", nume);
+            cmd.Parameters.AddWithValue("@d", descriere ?? "");
+            cmd.Parameters.AddWithValue("@p", pret);
+            cmd.Parameters.AddWithValue("@c", categorieId);
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public static bool ActualizeazaProdus(int id, string nume, string descriere, decimal pret, int categorieId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand(
+                "UPDATE Produse SET Nume=@n,Descriere=@d,Pret=@p,CategorieId=@c WHERE Id=@id",
+                conn);
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Parameters.AddWithValue("@n", nume);
+            cmd.Parameters.AddWithValue("@d", descriere ?? "");
+            cmd.Parameters.AddWithValue("@p", pret);
+            cmd.Parameters.AddWithValue("@c", categorieId);
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public static bool StergeProdusSoft(int id)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand("UPDATE Produse SET Disponibil=0 WHERE Id=@id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public static bool ActualizeazaStatusComanda(int comandaId, string status)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = new MySqlCommand("UPDATE Comenzi SET Status=@s WHERE Id=@id", conn);
+            cmd.Parameters.AddWithValue("@s", status);
+            cmd.Parameters.AddWithValue("@id", comandaId);
+            return cmd.ExecuteNonQuery() > 0;
+        }
     }
 }

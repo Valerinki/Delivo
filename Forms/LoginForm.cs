@@ -38,6 +38,7 @@ namespace Delivo.Forms
             // Setări Fereastră - Maximizat conform imaginii
             this.Text = "Delivo - Autentificare";
             this.WindowState = FormWindowState.Maximized;
+            this.MinimumSize = new Size(500, 750);
             this.BackColor = C_Dark;
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -83,17 +84,24 @@ namespace Delivo.Forms
                 Size = new Size(420, 500),
                 BackColor = Color.Transparent
             };
-            this.Resize += (s, e) => {
-                pnlContainer.Location = new Point((this.ClientSize.Width - pnlContainer.Width) / 2, 300);
-            };
-            this.Controls.Add(pnlContainer);
 
-            // Inițializăm pașii în container
+            // 2. SETEAZĂ LOGICA DE REDIMENSIONARE
+            this.SizeChanged += (s, e) => {
+                int x = (this.ClientSize.Width - pnlContainer.Width) / 2;
+                int y = (this.ClientSize.Height - pnlContainer.Height) / 2;
+
+                if (y < 180) y = 180;
+
+                pnlContainer.Location = new Point(x, y);
+            };
+
+            // 3. ADAUGĂ-L ÎN FORMULAR ȘI ADU-L ÎN FAȚĂ
+            this.Controls.Add(pnlContainer);
+            pnlContainer.BringToFront();
+
+            // 4. CONSTRUIEȘTE PAȘII
             BuildStep1(pnlContainer);
             BuildStep2(pnlContainer);
-
-            pnlStep1.Visible = true;
-            pnlStep2.Visible = false;
         }
 
         private void BuildStep1(Panel container)
