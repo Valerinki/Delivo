@@ -28,7 +28,25 @@
     <Compile Update="Forms\LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="Forms\MainForm.cs">
+    <Compile Update="Forms\Main\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Main\MainForm.Design.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Main\MainForm.Events.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Main\MainForm.Helpers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Main\MainForm.Navigation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Main\MainForm.Orders.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Main\MainForm.Products.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Forms\OrdersForm.cs">
