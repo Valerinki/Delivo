@@ -40,6 +40,9 @@
     <Compile Update="Forms\Main\MainForm.Helpers.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\Main\MainForm.History.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\Main\MainForm.Navigation.cs">
       <SubType>Form</SubType>
     </Compile>

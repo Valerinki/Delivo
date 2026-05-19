@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -11,17 +13,31 @@ namespace Delivo.Forms
     {
         private void LoadProds()
         {
-            try { _all = DatabaseHelper.GetProduse(); }
+            try
+            {
+                var toateProdusele = DatabaseHelper.GetProduse();
+
+                var popularIds = DatabaseHelper.GetProdusePopulare() ?? new List<int>();
+                // make unique and limit to 10
+                popularIds = popularIds.Distinct().Take(10).ToList();
+
+                _all = new List<(int, string, string, decimal, string)>();
+
+                Debug.WriteLine("[LoadProds] Popular IDs: " + string.Join(",", popularIds));
+
+                foreach (var id in popularIds)
+                {
+                    var produs = toateProdusele.FirstOrDefault(p => p.Id == id);
+                    Debug.WriteLine($"[LoadProds] id={id} matched={(produs.Id!=0?produs.Nume:"<not found>")}");
+                    if (produs.Id != 0)
+                        _all.Add(produs);
+                }
+            }
             catch
             {
-                _all = new List<(int, string, string, decimal, string)>{
-                    (1,"Pizza Margherita","Sos rosii, mozzarella, busuioc",89,"Pizza"),
-                    (2,"Pizza Pepperoni","Sos rosii, mozzarella, pepperoni",99,"Pizza"),
-                    (3,"Burger Classic","Carne de vita, salata, rosii",75,"Burgeri"),
-                    (4,"Burger BBQ","Carne de vita, sos BBQ, ceapa",85,"Burgeri"),
-                    (5,"Tiramisu","Desert italian clasic",45,"Deserturi")
-                };
+                _all = new List<(int, string, string, decimal, string)>();
             }
+
             RefreshCards();
         }
 
@@ -31,7 +47,16 @@ namespace Delivo.Forms
             flpProducts.Controls.Clear();
             int availableWidth = flpProducts.Width - 120;
             int cardWidth = availableWidth < 900 ? (availableWidth / 2) - 20 : 420;
-            foreach (var p in _all)
+
+            // Determină lista de produse în funcție de categoria selectată
+            List<(int Id, string Nume, string Descriere, decimal Pret, string Categorie)> listToShow;
+            if (string.IsNullOrEmpty(_selectedCategory))
+                listToShow = _all;
+            else
+                listToShow = _all.FindAll(p => p.Categorie.Equals(_selectedCategory, StringComparison.OrdinalIgnoreCase));
+
+            // show at most 10 products to keep the view compact
+            foreach (var p in listToShow)
             {
                 var card = MakeCard(p.Id, p.Nume, p.Descriere, p.Pret, p.Categorie, cardWidth);
                 card.Margin = new Padding(18, 10, 18, 22);
@@ -41,11 +66,24 @@ namespace Delivo.Forms
 
         private void FilterCat(string cat)
         {
-            var f = _all.FindAll(p => p.Categorie.Equals(cat, StringComparison.OrdinalIgnoreCase) ||
-                p.Categorie.Equals(cat == "Băuturi" ? "Bauturi" : cat, StringComparison.OrdinalIgnoreCase));
-            ShowList(f.Count > 0 ? f : _all);
-        }
+            // dacă utilizatorul apasă încă o dată aceeași categorie
+            // revine la produsele populare
+            if (_selectedCategory == cat)
+            {
+                _selectedCategory = "";
+                RefreshCards();
+                return;
+            }
 
+            _selectedCategory = cat;
+
+            var list = _all.FindAll(p =>
+                p.Categorie.Equals(cat, StringComparison.OrdinalIgnoreCase) ||
+                p.Categorie.Equals(cat == "Băuturi" ? "Bauturi" : cat,
+                StringComparison.OrdinalIgnoreCase));
+
+            ShowList(list);
+        }
         private void FilterSearch(string q)
         {
             if (string.IsNullOrWhiteSpace(q) || q.TrimStart().StartsWith("Caută"))
@@ -60,6 +98,7 @@ namespace Delivo.Forms
         {
             flpProducts.Controls.Clear();
             int cw = Math.Max(200, (flpProducts.Width - 24) / 2);
+            // limit to 10 items when showing a custom list
             foreach (var p in list)
                 flpProducts.Controls.Add(MakeCard(p.Id, p.Nume, p.Descriere, p.Pret, p.Categorie, cw));
         }

@@ -19,14 +19,14 @@ namespace Delivo.Forms
             // NAVBAR JOS
             pnlNavbar = new Panel { Dock = DockStyle.Bottom, Height = 68, BackColor = C_NavBg };
             pnlNavbar.Paint += PnlNavbar_Paint;
-            string[] nL = { "Acasă", "Caută", "Comenzi", "Profil" };
-            string[] nE = { "🏠", "🔍", "📋", "👤" };
+            string[] btnLabels = { "Acasă", "Comenzi", "Coș", "Profil" };
+            string[] btnIcons = { "🏠", "📋", "🛒", "👤" };
             for (int i = 0; i < 4; i++)
             {
                 int idx = i;
                 var b = new Button
                 {
-                    Text = nE[i] + "\n" + nL[i],
+                    Text = btnIcons[i] + "\n" + btnLabels[i],
                     Font = new Font(F_Tiny.FontFamily, 9),
                     ForeColor = i == 0 ? C_Orange : C_Muted,
                     BackColor = Color.Transparent,
@@ -143,7 +143,8 @@ namespace Delivo.Forms
                 int w = pnlHero.Width, h = pnlHero.Height;
                 int midY = (h - 60) / 2;
                 lblH1.Left = (w - lblH1.PreferredWidth) / 2;
-                lblH1.Top = midY - 50;
+                // slight upward adjustment so the main question sits a bit higher above the subtitle
+                lblH1.Top = midY - 65;
                 lblSub.Left = (w - lblSub.PreferredWidth) / 2;
                 lblSub.Top = midY - 4;
                 pnlSrch.Left = (w - pnlSrch.Width) / 2;
@@ -166,11 +167,12 @@ namespace Delivo.Forms
             flpCats = new FlowLayoutPanel
             {
                 Location = new Point(0, 44),
-                Height = 110,
+                // increased height so the circular icons and their labels are fully visible
+                Height = 170,
                 BackColor = C_Bg,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
-                AutoScroll = false
+                AutoScroll = true
             };
             pnlCatW.Controls.Add(lblCat);
             pnlCatW.Controls.Add(flpCats);
@@ -191,7 +193,8 @@ namespace Delivo.Forms
                 BackColor = C_Bg,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = true,
-                AutoScroll = false,
+                // enable internal scrolling so product cards can be scrolled when they overflow
+                AutoScroll = true,
                 Padding = new Padding(4)
             };
 
@@ -222,7 +225,8 @@ namespace Delivo.Forms
 
             int catTop = 66 + heroH + 25;
             pnlCatW.Width = w;
-            pnlCatW.Height = 170;
+            // give more vertical space for category icons and labels
+            pnlCatW.Height = 200;
             pnlCatW.Location = new Point(0, catTop);
 
             int totalCatsWidth = (140 + 30) * 5;
@@ -231,7 +235,8 @@ namespace Delivo.Forms
             flpCats.Location = new Point(0, 55);
             flpCats.Padding = new Padding(Math.Max(25, leftPadding), 5, 25, 5);
 
-            int popTop = catTop + 185;
+            // move the "Populare" section further down so category labels remain visible
+            int popTop = catTop + 230;
             lblPop.Location = new Point(32, popTop);
 
             flpProducts.Location = new Point(0, popTop + 55);
@@ -288,21 +293,25 @@ namespace Delivo.Forms
             foreach (var (em, nm) in cats)
             {
                 Color bg = CatColor.ContainsKey(nm) ? CatColor[nm] : C_Orange;
-                var item = new Panel { Width = 130, Height = 145, BackColor = Color.Transparent, Margin = new Padding(12, 0, 12, 0), Cursor = Cursors.Hand };
-                var circle = new Panel { Width = 95, Height = 95, BackColor = bg, Location = new Point(17, 5), Cursor = Cursors.Hand };
+                var item = new Panel { Width = 130, Height = 160, BackColor = Color.Transparent, Margin = new Padding(12, 0, 12, 0), Cursor = Cursors.Hand };
+                // move circle slightly higher so the category name below remains visible
+                var circle = new Panel { Width = 95, Height = 95, BackColor = bg, Location = new Point(17, 0), Cursor = Cursors.Hand };
                 Round(circle, 47);
                 circle.Paint += (s, pe) => { pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias; using var br = new SolidBrush(Color.FromArgb(35, Color.White)); pe.Graphics.FillEllipse(br, 8, 8, 35, 35); };
                 var lblE = new Label { Text = em, Font = new Font("Segoe UI Emoji", 34), AutoSize = false, Size = new Size(95, 95), TextAlign = ContentAlignment.MiddleCenter, BackColor = Color.Transparent };
-                var lblN = new Label { Text = nm, Font = new Font(F_Normal.FontFamily, 11, FontStyle.Bold), ForeColor = C_Text, Width = 130, Height = 30, TextAlign = ContentAlignment.MiddleCenter, Location = new Point(0, 108), BackColor = Color.Transparent };
+                var lblN = new Label { Text = nm, Font = new Font(F_Normal.FontFamily, 11, FontStyle.Bold), ForeColor = C_Text, Width = 130, Height = 30, TextAlign = ContentAlignment.MiddleCenter, Location = new Point(0, 110), BackColor = Color.Transparent };
                 circle.Controls.Add(lblE);
                 item.Controls.Add(circle);
                 item.Controls.Add(lblN);
+                // ensure the category label is visible above the circle
+                lblN.BringToFront();
                 void FC(object? s, EventArgs ev) => FilterCat(nm);
                 item.Click += FC;
                 circle.Click += FC;
                 lblE.Click += FC;
-                item.MouseEnter += (s, e) => { circle.Size = new Size(102, 102); circle.Location = new Point(14, 2); };
-                item.MouseLeave += (s, e) => { circle.Size = new Size(95, 95); circle.Location = new Point(17, 5); };
+                // reduced hover expansion so the circle doesn't overlap the label
+                item.MouseEnter += (s, e) => { circle.Size = new Size(99, 99); circle.Location = new Point(16, -1); };
+                item.MouseLeave += (s, e) => { circle.Size = new Size(95, 95); circle.Location = new Point(17, 0); };
                 flpCats.Controls.Add(item);
             }
         }

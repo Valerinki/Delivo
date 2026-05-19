@@ -29,6 +29,7 @@ namespace Delivo.Forms
         private Label lblGreet;
         private Panel pnlHeader, pnlCatW;
         private Label lblPop;
+        private string _selectedCategory = null;
 
         // Date
         private List<(int Id, string Nume, string Descriere, decimal Pret, string Categorie)> _all = new();
@@ -56,6 +57,15 @@ namespace Delivo.Forms
             BuildUI();
             LoadCats();
             LoadProds();
+            LoadCartFromFile();
+            UpdateCartButton();
+        }
+        private class CartItem
+        {
+            public int Id { get; set; }
+            public string Nume { get; set; } = "";
+            public decimal Pret { get; set; }
+            public int Qty { get; set; }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)

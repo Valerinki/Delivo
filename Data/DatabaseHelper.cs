@@ -51,6 +51,63 @@ namespace Delivo.Data
             return lista;
         }
 
+        // Return list of product ids marked as popular (ordered)
+        public static List<int> GetProdusePopulare()
+        {
+            var lista = new List<int>();
+            using var conn = GetConnection(); conn.Open();
+            // Return distinct ProdusId ordered by highest Ordine. This avoids duplicates if table has repeated rows.
+            var cmd = new MySqlCommand("SELECT ProdusId FROM ProdusePopulare GROUP BY ProdusId ORDER BY MAX(Ordine) DESC, ProdusId", conn);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                lista.Add(r.GetInt32(0));
+            return lista;
+        }
+        // Adaugă această metodă în clasa DatabaseHelper (de exemplu, după metoda PlaseazaComanda)
+
+        /// <summary>
+        /// Plasează o comandă cu detalii (produse individuale). Returnează ID-ul comenzii.
+        /// </summary>
+        public static int PlaseazaComandaCuDetaliu(int utilizatorId, decimal total, string adresa, List<(int produsId, int cantitate, decimal pretUnitar)> items)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var tran = conn.BeginTransaction();
+            try
+            {
+                // 1. Inserare în tabela Comenzi (folosind aceeași structură ca metoda existentă)
+                string sqlComanda = "INSERT INTO Comenzi (UtilizatorId, TotalPret, AdresaLivrare) VALUES (@uid, @total, @adr)";
+                int comandaId;
+                using (var cmd = new MySqlCommand(sqlComanda, conn, tran))
+                {
+                    cmd.Parameters.AddWithValue("@uid", utilizatorId);
+                    cmd.Parameters.AddWithValue("@total", total);
+                    cmd.Parameters.AddWithValue("@adr", adresa);
+                    cmd.ExecuteNonQuery();
+                    comandaId = (int)cmd.LastInsertedId;
+                }
+
+                // 2. Inserare detalii în tabela detaliicomenzi
+                string sqlDetaliu = "INSERT INTO detaliicomenzi (ComandaId, ProdusId, Cantitate, PretUnitar) VALUES (@cid, @pid, @qty, @pret)";
+                foreach (var (produsId, cantitate, pretUnitar) in items)
+                {
+                    using var cmd = new MySqlCommand(sqlDetaliu, conn, tran);
+                    cmd.Parameters.AddWithValue("@cid", comandaId);
+                    cmd.Parameters.AddWithValue("@pid", produsId);
+                    cmd.Parameters.AddWithValue("@qty", cantitate);
+                    cmd.Parameters.AddWithValue("@pret", pretUnitar);
+                    cmd.ExecuteNonQuery();
+                }
+
+                tran.Commit();
+                return comandaId;
+            }
+            catch
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
         public static int PlaseazaComanda(int utilizatorId, decimal total, string adresa)
         {
             using var conn = GetConnection(); conn.Open();
@@ -256,6 +313,90 @@ namespace Delivo.Data
             cmd.Parameters.AddWithValue("@s", status);
             cmd.Parameters.AddWithValue("@id", comandaId);
             return cmd.ExecuteNonQuery() > 0;
+        }
+        /// <summary>Returnează toate comenzile unui utilizator (header + detalii produse).</summary>
+        public static List<UserOrder> GetComenziUtilizatorCuDetalii(string username)
+        {
+            var userId = GetUserId(username);
+            if (userId == 0) return new List<UserOrder>();
+
+            var comenzi = new List<UserOrder>();
+            using var conn = GetConnection();
+            conn.Open();
+
+            // 1. Header comenzi
+            var cmdHeader = new MySqlCommand(
+                "SELECT Id, DataComanda, Status, TotalPret, AdresaLivrare FROM Comenzi WHERE UtilizatorId = @uid ORDER BY DataComanda DESC", conn);
+            cmdHeader.Parameters.AddWithValue("@uid", userId);
+            using var rdr = cmdHeader.ExecuteReader();
+            var ords = new List<(int id, DateTime data, string status, decimal total, string adresa)>();
+            while (rdr.Read())
+            {
+                ords.Add((
+                    rdr.GetInt32(0),
+                    rdr.GetDateTime(1),
+                    rdr.GetString(2),
+                    rdr.GetDecimal(3),
+                    rdr.IsDBNull(4) ? "" : rdr.GetString(4)
+                ));
+            }
+            rdr.Close();
+
+            // 2. Pentru fiecare comandă, preia detaliile
+            foreach (var ord in ords)
+            {
+                var details = new List<(string numeProdus, int cantitate, decimal pretUnitar)>();
+                var cmdDet = new MySqlCommand(
+                    @"SELECT p.Nume, d.Cantitate, d.PretUnitar 
+              FROM detaliicomenzi d
+              JOIN Produse p ON d.ProdusId = p.Id
+              WHERE d.ComandaId = @cid", conn);
+                cmdDet.Parameters.AddWithValue("@cid", ord.id);
+                using var rdrDet = cmdDet.ExecuteReader();
+                while (rdrDet.Read())
+                {
+                    details.Add((
+                        rdrDet.GetString(0),
+                        rdrDet.GetInt32(1),
+                        rdrDet.GetDecimal(2)
+                    ));
+                }
+                comenzi.Add(new UserOrder
+                {
+                    Id = ord.id,
+                    Data = ord.data,
+                    Status = ord.status,
+                    Total = ord.total,
+                    Adresa = ord.adresa,
+                    Produse = details
+                });
+            }
+            return comenzi;
+        }
+        public static bool ActualizeazaParola(string username, string parolaVeche, string parolaNoua)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            // Verifică parola veche
+            var cmdCheck = new MySqlCommand("SELECT COUNT(*) FROM Utilizatori WHERE NumeUtilizator=@u AND Parola=@p", conn);
+            cmdCheck.Parameters.AddWithValue("@u", username);
+            cmdCheck.Parameters.AddWithValue("@p", parolaVeche);
+            if (Convert.ToInt32(cmdCheck.ExecuteScalar()) == 0)
+                return false;
+
+            var cmdUpdate = new MySqlCommand("UPDATE Utilizatori SET Parola=@pNoua WHERE NumeUtilizator=@u", conn);
+            cmdUpdate.Parameters.AddWithValue("@pNoua", parolaNoua);
+            cmdUpdate.Parameters.AddWithValue("@u", username);
+            return cmdUpdate.ExecuteNonQuery() > 0;
+        }
+        public class UserOrder
+        {
+            public int Id { get; set; }
+            public DateTime Data { get; set; }
+            public string Status { get; set; } = "";
+            public decimal Total { get; set; }
+            public string Adresa { get; set; } = "";
+            public List<(string NumeProdus, int Cantitate, decimal PretUnitar)> Produse { get; set; } = new();
         }
     }
 }
