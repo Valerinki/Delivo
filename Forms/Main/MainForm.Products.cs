@@ -11,51 +11,61 @@ namespace Delivo.Forms
 {
     public partial class MainForm
     {
+        private List<(int Id, string Nume, string Descriere, decimal Pret, string Categorie)> _allProduse = new();
+
         private void LoadProds()
         {
             try
             {
-                var toateProdusele = DatabaseHelper.GetProduse();
+                // Încarcă toate produsele active
+                _allProduse = DatabaseHelper.GetProduse();
 
                 var popularIds = DatabaseHelper.GetProdusePopulare() ?? new List<int>();
-                // make unique and limit to 10
                 popularIds = popularIds.Distinct().Take(10).ToList();
 
                 _all = new List<(int, string, string, decimal, string)>();
-
-                Debug.WriteLine("[LoadProds] Popular IDs: " + string.Join(",", popularIds));
+                var numeProduseVazute = new HashSet<string>();
 
                 foreach (var id in popularIds)
                 {
-                    var produs = toateProdusele.FirstOrDefault(p => p.Id == id);
-                    Debug.WriteLine($"[LoadProds] id={id} matched={(produs.Id!=0?produs.Nume:"<not found>")}");
-                    if (produs.Id != 0)
+                    var produs = _allProduse.FirstOrDefault(p => p.Id == id);
+                    if (produs.Id != 0 && !numeProduseVazute.Contains(produs.Nume))
+                    {
                         _all.Add(produs);
+                        numeProduseVazute.Add(produs.Nume);
+                    }
+                    if (_all.Count >= 10) break;
                 }
             }
             catch
             {
+                _allProduse = new List<(int, string, string, decimal, string)>();
                 _all = new List<(int, string, string, decimal, string)>();
             }
 
             RefreshCards();
         }
 
+        private int GetCardWidth()
+        {
+            if (flpProducts == null) return 420;
+            int availableWidth = flpProducts.Width - 120;
+            return availableWidth < 900 ? (availableWidth / 2) - 20 : 420;
+        }
+
         private void RefreshCards()
         {
             if (flpProducts == null) return;
             flpProducts.Controls.Clear();
-            int availableWidth = flpProducts.Width - 120;
-            int cardWidth = availableWidth < 900 ? (availableWidth / 2) - 20 : 420;
+            int cardWidth = GetCardWidth();
 
-            // Determină lista de produse în funcție de categoria selectată
             List<(int Id, string Nume, string Descriere, decimal Pret, string Categorie)> listToShow;
             if (string.IsNullOrEmpty(_selectedCategory))
-                listToShow = _all;
+                listToShow = _all; // produse populare
             else
-                listToShow = _all.FindAll(p => p.Categorie.Equals(_selectedCategory, StringComparison.OrdinalIgnoreCase));
+                listToShow = _allProduse.FindAll(p => p.Categorie.Equals(_selectedCategory, StringComparison.OrdinalIgnoreCase) ||
+                    p.Categorie.Equals(_selectedCategory == "Băuturi" ? "Bauturi" : _selectedCategory, StringComparison.OrdinalIgnoreCase));
 
-            // show at most 10 products to keep the view compact
             foreach (var p in listToShow)
             {
                 var card = MakeCard(p.Id, p.Nume, p.Descriere, p.Pret, p.Categorie, cardWidth);
@@ -66,8 +76,6 @@ namespace Delivo.Forms
 
         private void FilterCat(string cat)
         {
-            // dacă utilizatorul apasă încă o dată aceeași categorie
-            // revine la produsele populare
             if (_selectedCategory == cat)
             {
                 _selectedCategory = "";
@@ -76,14 +84,9 @@ namespace Delivo.Forms
             }
 
             _selectedCategory = cat;
-
-            var list = _all.FindAll(p =>
-                p.Categorie.Equals(cat, StringComparison.OrdinalIgnoreCase) ||
-                p.Categorie.Equals(cat == "Băuturi" ? "Bauturi" : cat,
-                StringComparison.OrdinalIgnoreCase));
-
-            ShowList(list);
+            RefreshCards(); // acum RefreshCards folosește _allProduse pentru categorii
         }
+
         private void FilterSearch(string q)
         {
             if (string.IsNullOrWhiteSpace(q) || q.TrimStart().StartsWith("Caută"))
@@ -91,17 +94,23 @@ namespace Delivo.Forms
                 RefreshCards();
                 return;
             }
-            ShowList(_all.FindAll(p => p.Nume.ToLower().Contains(q.ToLower()) || p.Categorie.ToLower().Contains(q.ToLower())));
+            // Căutare în toate produsele (_allProduse)
+            var filtered = _allProduse.FindAll(p => p.Nume.ToLower().Contains(q.ToLower()) || p.Categorie.ToLower().Contains(q.ToLower()));
+            ShowList(filtered);
         }
 
         private void ShowList(List<(int Id, string Nume, string Descriere, decimal Pret, string Categorie)> list)
         {
             flpProducts.Controls.Clear();
-            int cw = Math.Max(200, (flpProducts.Width - 24) / 2);
-            // limit to 10 items when showing a custom list
+            int cardWidth = GetCardWidth();
             foreach (var p in list)
-                flpProducts.Controls.Add(MakeCard(p.Id, p.Nume, p.Descriere, p.Pret, p.Categorie, cw));
+            {
+                var card = MakeCard(p.Id, p.Nume, p.Descriere, p.Pret, p.Categorie, cardWidth);
+                card.Margin = new Padding(18, 10, 18, 22);
+                flpProducts.Controls.Add(card);
+            }
         }
+
 
         private Panel MakeCard(int id, string nume, string desc, decimal pret, string cat, int w)
         {
@@ -117,6 +126,14 @@ namespace Delivo.Forms
                 Cursor = Cursors.Hand
             };
             Round(card, 16);
+            if (!_darkMode)
+            {
+                card.Paint += (s, e) =>
+                {
+                    using var pen = new Pen(Color.FromArgb(180, 180, 180), 1);
+                    e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
+                };
+            }
 
             var pnlImg = new Panel
             {

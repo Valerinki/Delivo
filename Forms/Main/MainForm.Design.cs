@@ -12,6 +12,8 @@ namespace Delivo.Forms
             Text = "Delivo";
             WindowState = FormWindowState.Maximized;
             BackColor = C_Bg;
+            // переместить выше в метод:
+            pnlScroll = new Panel { Dock = DockStyle.Fill, BackColor = C_Bg, AutoScroll = true };
             MinimumSize = new Size(800, 600);
             FormBorderStyle = FormBorderStyle.Sizable;
             StartPosition = FormStartPosition.CenterScreen;
@@ -74,7 +76,9 @@ namespace Delivo.Forms
                 BackColor = Color.FromArgb(30, 255, 107, 0),
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(44, 44),
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                Padding = new Padding(0, -35, 0, 0),  // ridică liniile mai sus
+                TextAlign = ContentAlignment.MiddleCenter
             };
             btnHam.FlatAppearance.BorderSize = 1;
             btnHam.FlatAppearance.BorderColor = Color.FromArgb(80, 255, 107, 0);
@@ -124,8 +128,10 @@ namespace Delivo.Forms
                 Font = new Font(F_Normal.FontFamily, 13),
                 ForeColor = Color.FromArgb(130, 130, 130),
                 BackColor = Color.White,
-                Location = new Point(52, 13),
-                Text = "   Caută pizza, burgeri, sushi..."
+                Location = new Point(67, 13),
+                Text = "Caută pizza, burgeri, sushi...",  // fără spații la început
+                TextAlign = HorizontalAlignment.Left,
+                Padding = new Padding(30, 0, 0, 0)         // adaugă spațiu interior stânga
             };
             txtSearch.GotFocus += TxtSearch_GotFocus;
             txtSearch.LostFocus += TxtSearch_LostFocus;
@@ -182,7 +188,7 @@ namespace Delivo.Forms
             {
                 Text = "🔥  Populare",
                 Font = F_Bold,
-                ForeColor = C_Text,
+                ForeColor = Color.White,
                 AutoSize = true,
                 BackColor = Color.Transparent
             };
@@ -299,7 +305,17 @@ namespace Delivo.Forms
                 Round(circle, 47);
                 circle.Paint += (s, pe) => { pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias; using var br = new SolidBrush(Color.FromArgb(35, Color.White)); pe.Graphics.FillEllipse(br, 8, 8, 35, 35); };
                 var lblE = new Label { Text = em, Font = new Font("Segoe UI Emoji", 34), AutoSize = false, Size = new Size(95, 95), TextAlign = ContentAlignment.MiddleCenter, BackColor = Color.Transparent };
-                var lblN = new Label { Text = nm, Font = new Font(F_Normal.FontFamily, 11, FontStyle.Bold), ForeColor = C_Text, Width = 130, Height = 30, TextAlign = ContentAlignment.MiddleCenter, Location = new Point(0, 110), BackColor = Color.Transparent };
+                var lblN = new Label
+                {
+                    Text = nm,
+                    Font = new Font(F_Normal.FontFamily, 11, FontStyle.Bold),
+                    ForeColor = Color.White,       // ← modificat: forțează alb
+                    Width = 130,
+                    Height = 30,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Location = new Point(0, 110),
+                    BackColor = Color.Transparent
+                };
                 circle.Controls.Add(lblE);
                 item.Controls.Add(circle);
                 item.Controls.Add(lblN);

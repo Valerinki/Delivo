@@ -191,16 +191,113 @@ namespace Delivo.Forms
             btnLogout.FlatAppearance.BorderSize = 1;
             btnLogout.FlatAppearance.BorderColor = ColorDanger;
             RoundCorners(btnLogout, 22);
+
+            // --- Eveniment Click înlocuit cu popup personalizat ---
             btnLogout.Click += (s, e) =>
             {
-                var result = MessageBox.Show("Sigur vrei să te deconectezi?", "Deconectare",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (result == DialogResult.Yes)
+                using var confirmDialog = new Form
                 {
-                    new LoginForm().Show();
-                    Application.OpenForms[0]?.Close();
-                    this.Close();
-                }
+                    FormBorderStyle = FormBorderStyle.None,
+                    StartPosition = FormStartPosition.CenterParent,
+                    BackColor = Color.FromArgb(22, 32, 64),
+                    Width = 380,
+                    Height = 200,
+                    ShowInTaskbar = false,
+                    TopMost = true
+                };
+
+                confirmDialog.Paint += (ds, de) =>
+                {
+                    var gp = new GraphicsPath();
+                    int r = 20;
+                    var rect = confirmDialog.ClientRectangle;
+                    gp.AddArc(rect.Left, rect.Top, r * 2, r * 2, 180, 90);
+                    gp.AddArc(rect.Right - r * 2, rect.Top, r * 2, r * 2, 270, 90);
+                    gp.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                    gp.AddArc(rect.Left, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                    gp.CloseFigure();
+                    confirmDialog.Region = new Region(gp);
+                    de.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    using var pen = new Pen(ColorPortocaliu, 2);
+                    de.Graphics.DrawPath(pen, gp);
+                };
+
+                var lblTitle = new Label
+                {
+                    Text = "🔓  Deconectare",
+                    Font = new Font("Poppins", 12, FontStyle.Bold),
+                    ForeColor = Color.White,
+                    Location = new Point(24, 18),
+                    AutoSize = true
+                };
+                confirmDialog.Controls.Add(lblTitle);
+
+                var separator = new Panel
+                {
+                    BackColor = ColorPortocaliu,
+                    Height = 2,
+                    Width = confirmDialog.ClientSize.Width - 48,
+                    Location = new Point(24, 52)
+                };
+                confirmDialog.Controls.Add(separator);
+
+                var lblQuestion = new Label
+                {
+                    Text = "Sigur vrei să te deconectezi?",
+                    Font = new Font("Poppins", 10),
+                    ForeColor = Color.FromArgb(200, 215, 240),
+                    AutoSize = true,
+                    Location = new Point(24, 80)
+                };
+                confirmDialog.Controls.Add(lblQuestion);
+
+                int btnW = 100, btnH = 36;
+                var btnYes = new Button
+                {
+                    Text = "Da",
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = ColorPortocaliu,
+                    ForeColor = Color.White,
+                    Font = new Font("Poppins", 9, FontStyle.Bold),
+                    Size = new Size(btnW, btnH),
+                    Location = new Point(confirmDialog.ClientSize.Width - btnW * 2 - 20, confirmDialog.ClientSize.Height - 60),
+                    Cursor = Cursors.Hand
+                };
+                btnYes.FlatAppearance.BorderSize = 0;
+                RoundCorners(btnYes, 18);
+                btnYes.Click += (_, _) =>
+                {
+                    confirmDialog.Close();
+                    System.Diagnostics.Process.Start(Application.ExecutablePath);
+                    Application.Exit();
+                };
+
+                var btnNo = new Button
+                {
+                    Text = "Nu",
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = Color.FromArgb(45, 55, 85),
+                    ForeColor = Color.White,
+                    Font = new Font("Poppins", 9, FontStyle.Bold),
+                    Size = new Size(btnW, btnH),
+                    Location = new Point(confirmDialog.ClientSize.Width - btnW - 10, confirmDialog.ClientSize.Height - 60),
+                    Cursor = Cursors.Hand
+                };
+                btnNo.FlatAppearance.BorderSize = 0;
+                RoundCorners(btnNo, 18);
+                btnNo.Click += (_, _) => confirmDialog.Close();
+
+                confirmDialog.Controls.Add(btnYes);
+                confirmDialog.Controls.Add(btnNo);
+
+                confirmDialog.Resize += (_, _) =>
+                {
+                    separator.Width = confirmDialog.ClientSize.Width - 48;
+                    btnYes.Location = new Point(confirmDialog.ClientSize.Width - btnW * 2 - 20, confirmDialog.ClientSize.Height - 60);
+                    btnNo.Location = new Point(confirmDialog.ClientSize.Width - btnW - 10, confirmDialog.ClientSize.Height - 60);
+                };
+
+                confirmDialog.ShowDialog(this);
             };
             this.Controls.Add(btnLogout);
 
@@ -309,12 +406,96 @@ namespace Delivo.Forms
         }
 
         // --- Sub-popup-uri cu aceeași dimensiune (540x760) ---
+        private void ShowMessagePopup(string message, string title = "", bool isError = false)
+        {
+            using var dlg = new Form
+            {
+                FormBorderStyle = FormBorderStyle.None,
+                StartPosition = FormStartPosition.CenterParent,
+                BackColor = ColorAlbastruInchis,
+                Width = 380,
+                Height = 200,
+                ShowInTaskbar = false,
+                TopMost = true
+            };
+
+            dlg.Paint += (ds, de) =>
+            {
+                var gp = new GraphicsPath();
+                int r = 20;
+                var rect = dlg.ClientRectangle;
+                gp.AddArc(rect.Left, rect.Top, r * 2, r * 2, 180, 90);
+                gp.AddArc(rect.Right - r * 2, rect.Top, r * 2, r * 2, 270, 90);
+                gp.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                gp.AddArc(rect.Left, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                gp.CloseFigure();
+                dlg.Region = new Region(gp);
+                de.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var pen = new Pen(ColorPortocaliu, 2);
+                de.Graphics.DrawPath(pen, gp);
+            };
+
+            var lblTitle = new Label
+            {
+                Text = string.IsNullOrEmpty(title) ? (isError ? "Eroare" : "Informație") : title,
+                Font = new Font("Poppins", 12, FontStyle.Bold),
+                ForeColor = ColorAlb,
+                Location = new Point(24, 18),
+                AutoSize = true
+            };
+            dlg.Controls.Add(lblTitle);
+
+            var separator = new Panel
+            {
+                BackColor = ColorPortocaliu,
+                Height = 2,
+                Width = dlg.ClientSize.Width - 48,
+                Location = new Point(24, 52)
+            };
+            dlg.Controls.Add(separator);
+
+            var lblMsg = new Label
+            {
+                Text = message,
+                Font = new Font("Poppins", 10),
+                ForeColor = Color.FromArgb(200, 215, 240),
+                AutoSize = true,
+                Location = new Point(24, 80),
+                MaximumSize = new Size(dlg.ClientSize.Width - 48, 0)
+            };
+            dlg.Controls.Add(lblMsg);
+
+            var btnOk = new Button
+            {
+                Text = "OK",
+                FlatStyle = FlatStyle.Flat,
+                BackColor = ColorPortocaliu,
+                ForeColor = ColorAlb,
+                Font = new Font("Poppins", 10, FontStyle.Bold),
+                Size = new Size(100, 36),
+                Location = new Point((dlg.ClientSize.Width - 100) / 2, dlg.ClientSize.Height - 60),
+                Cursor = Cursors.Hand
+            };
+            btnOk.FlatAppearance.BorderSize = 0;
+            RoundCorners(btnOk, 18);
+            btnOk.Click += (_, _) => dlg.Close();
+            dlg.Controls.Add(btnOk);
+
+            dlg.Resize += (_, _) =>
+            {
+                separator.Width = dlg.ClientSize.Width - 48;
+                btnOk.Location = new Point((dlg.ClientSize.Width - 100) / 2, dlg.ClientSize.Height - 60);
+            };
+
+            dlg.ShowDialog(this);
+        }
+
+        // Versiunea modificată a OpenAddressPopup (înlocuiește MessageBox-urile)
         private void OpenAddressPopup()
         {
             using var popup = new SubPopupForm("📍  Adrese salvate", 540, 760);
             var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), BackColor = ColorAlbastruInchis };
 
-            // Container principal (mutat mai jos pentru a evita suprapunerea cu titlul)
             var container = new Panel
             {
                 Size = new Size(panel.Width - 48, panel.Height - 100),
@@ -324,7 +505,6 @@ namespace Delivo.Forms
             };
             panel.Controls.Add(container);
 
-            // Text explicativ (centrat)
             var lblInfo = new Label
             {
                 Text = "📌  Lista adreselor tale salvate",
@@ -336,7 +516,6 @@ namespace Delivo.Forms
             };
             container.Controls.Add(lblInfo);
 
-            // Lista de adrese (centrată, 80% lățime)
             int listWidth = (int)(container.Width * 0.8);
             int listX = (container.Width - listWidth) / 2;
             var lstAddresses = new ListBox
@@ -353,7 +532,6 @@ namespace Delivo.Forms
             };
             container.Controls.Add(lstAddresses);
 
-            // --- Câmp text pentru adresă (design modern) ---
             var txtAddress = new TextBox
             {
                 Width = listWidth,
@@ -366,12 +544,10 @@ namespace Delivo.Forms
                 PlaceholderText = "✏️  Scrie aici o adresă nouă sau editează una existentă...",
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
-            // Adăugăm un efect vizual subtil
             txtAddress.GotFocus += (s, e) => txtAddress.BackColor = Color.FromArgb(35, 45, 75);
             txtAddress.LostFocus += (s, e) => txtAddress.BackColor = ColorAlbastruCard;
             container.Controls.Add(txtAddress);
 
-            // Buton Salvează (centrat)
             int btnSaveWidth = 180;
             int btnSaveHeight = 42;
             var btnSave = new Button
@@ -389,7 +565,6 @@ namespace Delivo.Forms
             RoundCorners(btnSave, 21);
             container.Controls.Add(btnSave);
 
-            // Butoane pentru editare/ștergere (centrate)
             int btnWidth = 150;
             int btnHeight = 38;
             int spacing = 20;
@@ -416,7 +591,7 @@ namespace Delivo.Forms
             {
                 if (lstAddresses.SelectedItem == null || !lstAddresses.Enabled)
                 {
-                    MessageBox.Show("Selectați o adresă din listă.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ShowMessagePopup("Selectați o adresă din listă.", "Eroare", true);
                     return;
                 }
                 txtAddress.Text = lstAddresses.SelectedItem.ToString();
@@ -442,11 +617,84 @@ namespace Delivo.Forms
             {
                 if (lstAddresses.SelectedItem == null || !lstAddresses.Enabled)
                 {
-                    MessageBox.Show("Selectați o adresă.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ShowMessagePopup("Selectați o adresă.", "Eroare", true);
                     return;
                 }
-                if (MessageBox.Show("Ștergeți adresa selectată?", "Confirmare", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+
+                // Popup personalizat de confirmare ștergere
+                using var confirmDlg = new Form
                 {
+                    FormBorderStyle = FormBorderStyle.None,
+                    StartPosition = FormStartPosition.CenterParent,
+                    BackColor = ColorAlbastruInchis,
+                    Width = 400,
+                    Height = 200,
+                    ShowInTaskbar = false,
+                    TopMost = true
+                };
+
+                confirmDlg.Paint += (ds, de) =>
+                {
+                    var gp = new GraphicsPath();
+                    int r = 20;
+                    var rect = confirmDlg.ClientRectangle;
+                    gp.AddArc(rect.Left, rect.Top, r * 2, r * 2, 180, 90);
+                    gp.AddArc(rect.Right - r * 2, rect.Top, r * 2, r * 2, 270, 90);
+                    gp.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                    gp.AddArc(rect.Left, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                    gp.CloseFigure();
+                    confirmDlg.Region = new Region(gp);
+                    de.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    using var pen = new Pen(ColorPortocaliu, 2);
+                    de.Graphics.DrawPath(pen, gp);
+                };
+
+                var lblTitle = new Label
+                {
+                    Text = "Confirmare ștergere",
+                    Font = new Font("Poppins", 12, FontStyle.Bold),
+                    ForeColor = ColorAlb,
+                    Location = new Point(24, 18),
+                    AutoSize = true
+                };
+                confirmDlg.Controls.Add(lblTitle);
+
+                var separatorConf = new Panel
+                {
+                    BackColor = ColorPortocaliu,
+                    Height = 2,
+                    Width = confirmDlg.ClientSize.Width - 48,
+                    Location = new Point(24, 52)
+                };
+                confirmDlg.Controls.Add(separatorConf);
+
+                var lblQuestion = new Label
+                {
+                    Text = "Ștergeți adresa selectată?",
+                    Font = new Font("Poppins", 10),
+                    ForeColor = Color.FromArgb(200, 215, 240),
+                    AutoSize = true,
+                    Location = new Point(24, 80)
+                };
+                confirmDlg.Controls.Add(lblQuestion);
+
+                int btnW = 100, btnH = 36;
+                var btnYes = new Button
+                {
+                    Text = "Da",
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = ColorPortocaliu,
+                    ForeColor = ColorAlb,
+                    Font = new Font("Poppins", 9, FontStyle.Bold),
+                    Size = new Size(btnW, btnH),
+                    Location = new Point(confirmDlg.ClientSize.Width - btnW * 2 - 20, confirmDlg.ClientSize.Height - 60),
+                    Cursor = Cursors.Hand
+                };
+                btnYes.FlatAppearance.BorderSize = 0;
+                RoundCorners(btnYes, 18);
+                btnYes.Click += (_, _) =>
+                {
+                    confirmDlg.Close();
                     lstAddresses.Items.Remove(lstAddresses.SelectedItem);
                     if (lstAddresses.Items.Count == 0)
                     {
@@ -456,13 +704,38 @@ namespace Delivo.Forms
                     }
                     SaveAddresses(lstAddresses);
                     txtAddress.Clear();
-                }
+                };
+
+                var btnNo = new Button
+                {
+                    Text = "Nu",
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = Color.FromArgb(45, 55, 85),
+                    ForeColor = ColorAlb,
+                    Font = new Font("Poppins", 9, FontStyle.Bold),
+                    Size = new Size(btnW, btnH),
+                    Location = new Point(confirmDlg.ClientSize.Width - btnW - 10, confirmDlg.ClientSize.Height - 60),
+                    Cursor = Cursors.Hand
+                };
+                btnNo.FlatAppearance.BorderSize = 0;
+                RoundCorners(btnNo, 18);
+                btnNo.Click += (_, _) => confirmDlg.Close();
+
+                confirmDlg.Controls.Add(btnYes);
+                confirmDlg.Controls.Add(btnNo);
+                confirmDlg.Resize += (_, _) =>
+                {
+                    separatorConf.Width = confirmDlg.ClientSize.Width - 48;
+                    btnYes.Location = new Point(confirmDlg.ClientSize.Width - btnW * 2 - 20, confirmDlg.ClientSize.Height - 60);
+                    btnNo.Location = new Point(confirmDlg.ClientSize.Width - btnW - 10, confirmDlg.ClientSize.Height - 60);
+                };
+                confirmDlg.ShowDialog(this);
             };
 
             container.Controls.Add(btnEditSelected);
             container.Controls.Add(btnDeleteSelected);
 
-            // Încărcare adrese + mesaj inițial
+            // Încărcare adrese
             string addrFile = Path.Combine(Application.UserAppDataPath, "user_addresses.json");
             bool hasAddresses = false;
             if (File.Exists(addrFile))
@@ -487,25 +760,22 @@ namespace Delivo.Forms
                 lstAddresses.ForeColor = ColorTextSecundar;
             }
 
-            // Eveniment Salvează (adaugă sau înlocuiește)
             btnSave.Click += (s, e) =>
             {
                 string newAddr = txtAddress.Text.Trim();
                 if (string.IsNullOrWhiteSpace(newAddr))
                 {
-                    MessageBox.Show("Introduceți o adresă validă.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ShowMessagePopup("Introduceți o adresă validă.", "Eroare", true);
                     return;
                 }
 
                 if (lstAddresses.SelectedItem != null && lstAddresses.Enabled && lstAddresses.SelectedIndex >= 0)
                 {
-                    // Editare: înlocuiește elementul selectat
                     int idx = lstAddresses.SelectedIndex;
                     lstAddresses.Items[idx] = newAddr;
                 }
                 else
                 {
-                    // Adăugare nouă
                     if (lstAddresses.Items.Count == 1 && lstAddresses.Items[0].ToString().Contains("Nu ai adrese"))
                     {
                         lstAddresses.Items.Clear();
@@ -519,7 +789,6 @@ namespace Delivo.Forms
                 if (!lstAddresses.Enabled) lstAddresses.Enabled = true;
             };
 
-            // Ajustare la redimensionare
             container.Resize += (_, _) =>
             {
                 lblInfo.Location = new Point((container.Width - lblInfo.Width) / 2, 5);
@@ -957,10 +1226,9 @@ namespace Delivo.Forms
             };
             container.Controls.Add(lblInfoLine2);
 
-            // Panel scrollabil pentru lista de comenzi
+            // Panel scrollabil pentru lista de comenzi (îi vom seta înălțimea dinamic, lăsând loc pentru buton)
             var pnlOrdersScroll = new Panel
             {
-                Location = new Point(0, lblInfoLine2.Bottom + 20),
                 BackColor = Color.Transparent,
                 AutoScroll = true,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
@@ -1074,9 +1342,9 @@ namespace Delivo.Forms
                 };
             }
 
-            // Buton închidere (poziționat mai sus, la 50px de margine)
+            // Buton închidere (poziționat fix, nu în zona scrollabilă)
             int btnWidth = 160;
-            int btnHeight = 38;
+            int btnHeight = 42;
             var btnClose = new Button
             {
                 Text = "Închide",
@@ -1098,11 +1366,16 @@ namespace Delivo.Forms
                 // Repoziționare texte
                 lblInfoLine1.Location = new Point((container.Width - lblInfoLine1.Width) / 2, 5);
                 lblInfoLine2.Location = new Point((container.Width - lblInfoLine2.Width) / 2, lblInfoLine1.Bottom + 2);
-                // Setează dimensiunea și poziția panelului scrollabil
-                pnlOrdersScroll.Location = new Point(0, lblInfoLine2.Bottom + 20);
-                pnlOrdersScroll.Size = new Size(container.Width, container.Height - (lblInfoLine2.Bottom + 20) - 60);
-                // Butonul de închidere – poziționat la 50px de marginea de jos a containerului
-                btnClose.Location = new Point((container.Width - btnWidth) / 2, container.Height - 65);
+
+                // Setează dimensiunea panelului scrollabil: lasă 70px pentru buton (înălțime buton + margini)
+                int scrollY = lblInfoLine2.Bottom + 20;
+                int scrollHeight = container.Height - scrollY - 105; // 65 = spațiu pentru buton (42 + 23 margini)
+                if (scrollHeight < 100) scrollHeight = 100;
+                pnlOrdersScroll.Location = new Point(0, scrollY);
+                pnlOrdersScroll.Size = new Size(container.Width, scrollHeight);
+
+                // Butonul de închidere poziționat la 15px de marginea de jos a containerului
+                btnClose.Location = new Point((container.Width - btnWidth) / 2, container.Height - 90);
             };
 
             // Forțează un prim calcul al dimensiunilor

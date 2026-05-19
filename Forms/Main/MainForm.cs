@@ -10,10 +10,11 @@ namespace Delivo.Forms
     {
         // Tema
         private bool _darkMode = true;
-        private Color C_Bg => _darkMode ? Color.FromArgb(13, 27, 62) : Color.FromArgb(235, 240, 255);
-        private Color C_Card => _darkMode ? Color.FromArgb(22, 32, 64) : Color.White;
-        private Color C_Text => _darkMode ? Color.White : Color.FromArgb(15, 25, 55);
-        private Color C_Muted => _darkMode ? Color.FromArgb(136, 153, 187) : Color.FromArgb(100, 115, 150);
+        private Color C_Bg => _darkMode ? Color.FromArgb(13, 27, 62) : Color.White;
+        private Color C_Card => _darkMode ? Color.FromArgb(22, 32, 64) : Color.FromArgb(250, 250, 252);
+        private Color C_Text => _darkMode ? Color.White : Color.FromArgb(30, 30, 40);
+        private Color C_Muted => _darkMode ? Color.FromArgb(136, 153, 187) : Color.FromArgb(110, 110, 120);
+        private Color C_Border => _darkMode ? Color.FromArgb(40, 255, 255, 255) : Color.FromArgb(200, 200, 200);
         private readonly Color C_Orange = Color.FromArgb(255, 107, 0);
         private readonly Color C_NavBg = Color.FromArgb(8, 18, 48);
 
@@ -50,6 +51,55 @@ namespace Delivo.Forms
             {"Bauturi",  Color.FromArgb(20,140,90)},
             {"Băuturi",  Color.FromArgb(20,140,90)}
         };
+        private void UpdateCategoryColorsForTheme()
+        {
+            if (_darkMode)
+            {
+                // Culorile originale (închise)
+                CatColor["Pizza"] = Color.FromArgb(220, 70, 20);
+                CatColor["Burgeri"] = Color.FromArgb(180, 90, 10);
+                CatColor["Sushi"] = Color.FromArgb(20, 110, 180);
+                CatColor["Deserturi"] = Color.FromArgb(180, 40, 110);
+                CatColor["Bauturi"] = Color.FromArgb(20, 140, 90);
+                CatColor["Băuturi"] = Color.FromArgb(20, 140, 90);
+            }
+            else
+            {
+                // Mod light: toate cercurile devin o nuanță uniformă de gri deschis
+                Color lightGray = Color.FromArgb(200, 200, 210);
+                CatColor["Pizza"] = lightGray;
+                CatColor["Burgeri"] = lightGray;
+                CatColor["Sushi"] = lightGray;
+                CatColor["Deserturi"] = lightGray;
+                CatColor["Bauturi"] = lightGray;
+                CatColor["Băuturi"] = lightGray;
+            }
+        }
+        private void UpdateExistingCategoriesColors()
+        {
+            foreach (Control item in flpCats.Controls)
+            {
+                if (item is Panel itemPanel)
+                {
+                    Panel? circle = null;
+                    Label? lblN = null;
+                    foreach (Control child in itemPanel.Controls)
+                    {
+                        if (child is Panel p && p.Size == new Size(95, 95))
+                            circle = p;
+                        else if (child is Label l && l.Location.Y == 110)
+                            lblN = l;
+                    }
+                    if (circle != null && lblN != null)
+                    {
+                        string catName = lblN.Text;
+                        Color newColor = CatColor.ContainsKey(catName) ? CatColor[catName] : C_Orange;
+                        circle.BackColor = newColor;
+                        lblN.ForeColor = Color.White; // ← forțează alb
+                    }
+                }
+            }
+        }
 
         public MainForm()
         {

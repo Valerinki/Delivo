@@ -20,8 +20,8 @@ namespace Delivo.Forms
             {
                 if (c is Button btn && btn.Text == "≡")
                 {
-                    lblGreet.Location = new Point(pnlHeader.Width - lblGreet.PreferredWidth - 62, 24);
-                    btn.Location = new Point(pnlHeader.Width - 54, 11);
+                    lblGreet.Location = new Point(pnlHeader.Width - lblGreet.PreferredWidth - 70, 24);
+                    btn.Location = new Point(pnlHeader.Width - 70, 8);
                     break;
                 }
             }
@@ -29,7 +29,7 @@ namespace Delivo.Forms
 
         private void TxtSearch_GotFocus(object? sender, EventArgs e)
         {
-            if (txtSearch.Text.TrimStart().StartsWith("Caută"))
+            if (txtSearch.Text == "Caută pizza, burgeri, sushi...")
             {
                 txtSearch.Text = "";
                 txtSearch.ForeColor = Color.Black;
@@ -40,7 +40,7 @@ namespace Delivo.Forms
         {
             if (string.IsNullOrWhiteSpace(txtSearch.Text))
             {
-                txtSearch.Text = "   Caută pizza, burgeri, sushi...";
+                txtSearch.Text = "Caută pizza, burgeri, sushi...";
                 txtSearch.ForeColor = Color.FromArgb(130, 130, 130);
             }
         }

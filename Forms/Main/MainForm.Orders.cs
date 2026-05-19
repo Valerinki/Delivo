@@ -39,9 +39,102 @@ namespace Delivo.Forms
         {
             if (_cart.Count == 0)
             {
-                ShowPopup("Coșul este gol! 🛒", isToast: true);
+                // Popup personalizat pentru coș gol, mai vizibil
+                // Popup personalizat pentru coș gol
+                // Popup personalizat pentru coș gol
+                using var dlg = new Form
+                {
+                    FormBorderStyle = FormBorderStyle.None,
+                    StartPosition = FormStartPosition.CenterParent,
+                    BackColor = Color.FromArgb(22, 32, 64),
+                    Width = 380,
+                    Height = 300,
+                    ShowInTaskbar = false,
+                    TopMost = true
+                };
+
+                // Colțuri rotunde + bordură portocalie
+                dlg.Paint += (s, e) =>
+                {
+                    var gp = new GraphicsPath();
+                    int r = 20;
+                    var rect = dlg.ClientRectangle;
+                    gp.AddArc(rect.Left, rect.Top, r * 2, r * 2, 180, 90);
+                    gp.AddArc(rect.Right - r * 2, rect.Top, r * 2, r * 2, 270, 90);
+                    gp.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                    gp.AddArc(rect.Left, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                    gp.CloseFigure();
+                    dlg.Region = new Region(gp);
+                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    using var pen = new Pen(C_Orange, 2);
+                    e.Graphics.DrawPath(pen, gp);
+                };
+
+                // Iconiță coș (centrată orizontal, ușor mai sus)
+                var lblIcon = new Label
+                {
+                    Text = "🛒",
+                    Font = new Font("Segoe UI Emoji", 44),
+                    ForeColor = C_Orange,
+                    AutoSize = true,
+                    Location = new Point((dlg.ClientSize.Width - 130) / 2, 40),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+                dlg.Controls.Add(lblIcon);
+
+                // Mesaj principal (imediat sub iconiță)
+                var lblMsg = new Label
+                {
+                    Text = "Coșul este gol!",
+                    Font = new Font("Poppins", 16, FontStyle.Bold),
+                    ForeColor = Color.White,
+                    AutoSize = true,
+                    Location = new Point((dlg.ClientSize.Width - 180) / 2, 170),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+                dlg.Controls.Add(lblMsg);
+
+                // Subtitlu
+                var lblSub = new Label
+                {
+                    Text = "Adaugă produse pentru a plasa o comandă.",
+                    Font = new Font("Poppins", 10),
+                    ForeColor = Color.FromArgb(200, 215, 240),
+                    AutoSize = true,
+                    Location = new Point((dlg.ClientSize.Width - 335) / 2, 210),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+                dlg.Controls.Add(lblSub);
+
+                // Buton OK (rotunjit, centrat)
+                var btnOk = new Button
+                {
+                    Text = "OK",
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = C_Orange,
+                    ForeColor = Color.White,
+                    Font = new Font("Poppins", 10, FontStyle.Bold),
+                    Size = new Size(100, 36),
+                    Location = new Point((dlg.ClientSize.Width - 100) / 2, 250),
+                    Cursor = Cursors.Hand
+                };
+                btnOk.FlatAppearance.BorderSize = 0;
+                btnOk.Click += (_, _) => dlg.Close();
+
+                // Rotunjim butonul
+                var path = new GraphicsPath();
+                int radius = 18;
+                path.AddArc(0, 0, radius * 2, radius * 2, 180, 90);
+                path.AddArc(btnOk.Width - radius * 2, 0, radius * 2, radius * 2, 270, 90);
+                path.AddArc(btnOk.Width - radius * 2, btnOk.Height - radius * 2, radius * 2, radius * 2, 0, 90);
+                path.AddArc(0, btnOk.Height - radius * 2, radius * 2, radius * 2, 90, 90);
+                btnOk.Region = new Region(path);
+
+                dlg.Controls.Add(btnOk);
+                dlg.ShowDialog(this);
                 return;
             }
+
             using var dialog = BuildOrderDialog();
             dialog.ShowDialog(this);
         }

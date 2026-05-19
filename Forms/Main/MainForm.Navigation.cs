@@ -23,7 +23,6 @@ namespace Delivo.Forms
 
         private void OpenMenu(object? sender, EventArgs e)
         {
-            // Dacă meniul este deja deschis, îl închidem
             if (_menuPanel != null && Controls.Contains(_menuPanel))
             {
                 Controls.Remove(_menuPanel);
@@ -32,18 +31,23 @@ namespace Delivo.Forms
                 return;
             }
 
-            int menuWidth = 340;
-            int margin = 20;
+            // ========== PARAMETRI REGLABILI MANUAL ==========
+            int menuWidth = 340;                // lățimea meniului
+            int margin = 20;                   // marginea stângă internă
+            int menuRightOffset = -15;         // cu cât mai la stânga față de marginea ferestrei (negativ = spre stânga)
+            int separatorTopY = 62;            // poziția liniei de separare (mai sus = valoare mai mică)
+                                               // ===============================================
+
+            int menuX = ClientSize.Width - menuWidth + menuRightOffset; // calcul poziție X
 
             _menuPanel = new Panel
             {
                 Width = menuWidth,
                 Height = ClientSize.Height - pnlNavbar.Height,
-                Location = new Point(ClientSize.Width - menuWidth, 0),
+                Location = new Point(menuX, 0),
                 BackColor = Color.FromArgb(245, 10, 22, 54),
             };
 
-            // Bordură stânga portocalie
             _menuPanel.Paint += (s, pe) =>
             {
                 using var pen = new Pen(Color.FromArgb(180, 255, 107, 0), 3);
@@ -53,29 +57,29 @@ namespace Delivo.Forms
                 pe.Graphics.FillRectangle(lgb, 1, 0, menuWidth - 1, _menuPanel.Height);
             };
 
-            // TableLayoutPanel pentru a plasa logout-ul jos
             var mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.Transparent,
                 RowCount = 3,
-                ColumnCount = 1
+                ColumnCount = 1,
+                AutoScroll = true
             };
             mainLayout.RowStyles.Clear();
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80f)); // zona logo + buton X
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f)); // zona dinamica (butoanele)
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70f));  // zona deconectare
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70f));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70f));
             _menuPanel.Controls.Add(mainLayout);
 
-            // ========== ZONA DE SUS (logo + buton închidere) ==========
-            var topPanel = new Panel { Height = 80, BackColor = Color.Transparent, Dock = DockStyle.Fill };
+            // ========== ZONA DE SUS ==========
+            var topPanel = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             var lblLogo = new Label
             {
                 Text = "DELIVO",
                 Font = F_Logo,
                 ForeColor = C_Orange,
                 AutoSize = true,
-                Location = new Point(margin, 20),
+                Location = new Point(margin, (70 - F_Logo.Height) / 2),
                 BackColor = Color.Transparent
             };
             var btnClose = new Button
@@ -85,8 +89,8 @@ namespace Delivo.Forms
                 ForeColor = C_Orange,
                 BackColor = Color.FromArgb(30, 255, 107, 0),
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(38, 38),
-                Location = new Point(menuWidth - 58, 18),
+                Size = new Size(36, 36),
+                Location = new Point(menuWidth - 48, (70 - 36) / 2),
                 Cursor = Cursors.Hand
             };
             btnClose.FlatAppearance.BorderSize = 1;
@@ -94,11 +98,12 @@ namespace Delivo.Forms
             Round(btnClose, 10);
             btnClose.Click += (_, _) => CloseMenu();
 
+            // Separator poziționat mai sus conform separatorTopY
             var sepTop = new Panel
             {
                 Height = 1,
                 Width = menuWidth - margin * 2,
-                Location = new Point(margin, 72),
+                Location = new Point(margin, separatorTopY),
                 BackColor = Color.FromArgb(60, 255, 107, 0)
             };
             topPanel.Controls.Add(lblLogo);
@@ -106,19 +111,18 @@ namespace Delivo.Forms
             topPanel.Controls.Add(sepTop);
             mainLayout.Controls.Add(topPanel, 0, 0);
 
-            // ========== ZONA DINAMICĂ (butoanele meniului) ==========
+            // ========== ZONA DINAMICĂ ==========
             var itemsPanel = new FlowLayoutPanel
             {
                 FlowDirection = FlowDirection.TopDown,
                 WrapContents = false,
-                AutoScroll = true,
+                AutoScroll = false,
                 Dock = DockStyle.Fill,
                 BackColor = Color.Transparent,
-                Padding = new Padding(0, 10, 0, 10)
+                Padding = new Padding(0, 5, 0, 5)
             };
             mainLayout.Controls.Add(itemsPanel, 0, 1);
 
-            // Elementele meniului (fără deconectare)
             var menuItems = new (string icon, string text, Action action)[]
             {
         ("🔍", "Caută", () => { CloseMenu(); txtSearch.Focus(); }),
@@ -126,7 +130,7 @@ namespace Delivo.Forms
         ("🌙", "Schimbă tema", () => { CloseMenu(); ToggleTheme(); }),
             };
 
-            int itemHeight = 52;
+            int itemHeight = 50;
             int btnWidth = menuWidth - margin * 2;
             foreach (var item in menuItems)
             {
@@ -135,9 +139,14 @@ namespace Delivo.Forms
             }
 
             // ========== ZONA DE JOS (deconectare) ==========
-            var logoutPanel = new Panel { Height = 70, BackColor = Color.Transparent, Dock = DockStyle.Fill };
-            var logoutRow = CreateMenuItem("🚪", "Deconectare", () => { CloseMenu(); PerformLogout(); }, btnWidth, itemHeight, isLogout: true);
-            logoutRow.Margin = new Padding(margin, 8, margin, 12);
+            int logoutRightMargin = 8; // distanţa de la marginea dreaptă
+            int logoutBtnWidth = btnWidth - logoutRightMargin;
+            var logoutRow = CreateMenuItem("🚪", "Deconectare", () => { CloseMenu(); PerformLogout(); }, logoutBtnWidth, itemHeight, isLogout: true);
+            int logoutMarginTop = (70 - itemHeight) / 2;
+            logoutRow.Margin = new Padding(margin, logoutMarginTop, 0, logoutMarginTop);
+            logoutRow.Location = new Point(margin, logoutMarginTop); // aliniere la stânga
+
+            var logoutPanel = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             logoutPanel.Controls.Add(logoutRow);
             mainLayout.Controls.Add(logoutPanel, 0, 2);
 
@@ -155,18 +164,26 @@ namespace Delivo.Forms
             _menuPanel.BringToFront();
         }
 
-        // Helper pentru a crea un element de meniu (refactorizat)
         private Panel CreateMenuItem(string icon, string text, Action action, int width, int height, bool isLogout = false)
         {
+            // ========== PARAMETRI REGLABILI ==========
+            int iconLeft = 16;          // distanța iconiței de la marginea stângă
+            int textLeft = 65;          // distanța textului de la marginea stângă (mărită pentru a nu fi acoperit)
+            int arrowRight = 26;        // distanța săgeții de la marginea dreaptă
+                                        // ========================================
+
             var row = new Panel
             {
                 Width = width,
                 Height = height,
                 BackColor = Color.FromArgb(20, 255, 255, 255),
                 Cursor = Cursors.Hand,
-                Margin = new Padding(20, 5, 20, 5)
+                Margin = new Padding(20, 4, 20, 4)
             };
-            Round(row, 14);
+            Round(row, 12);
+
+            int centerY = (height - 22) / 2; // pentru iconiță și săgeată
+            int textCenterY = (height - 20) / 2;
 
             var lblIcon = new Label
             {
@@ -174,7 +191,7 @@ namespace Delivo.Forms
                 Font = new Font("Segoe UI Emoji", 16),
                 ForeColor = isLogout ? ColorDanger : C_Orange,
                 AutoSize = true,
-                Location = new Point(16, (height - 22) / 2),
+                Location = new Point(iconLeft, centerY),
                 BackColor = Color.Transparent
             };
 
@@ -184,9 +201,9 @@ namespace Delivo.Forms
                 Font = new Font("Segoe UI", 10.5f, FontStyle.Bold),
                 ForeColor = isLogout ? ColorDanger : C_Text,
                 AutoSize = true,
-                Location = new Point(52, (height - 20) / 2),
+                Location = new Point(textLeft, textCenterY),
                 BackColor = Color.Transparent,
-                MaximumSize = new Size(width - 100, 0)
+                MaximumSize = new Size(width - textLeft - 40, 0)
             };
 
             var lblArrow = new Label
@@ -195,7 +212,7 @@ namespace Delivo.Forms
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 ForeColor = C_Muted,
                 AutoSize = true,
-                Location = new Point(row.Width - 30, (height - 20) / 2),
+                Location = new Point(row.Width - arrowRight, centerY),
                 BackColor = Color.Transparent
             };
 
@@ -226,18 +243,29 @@ namespace Delivo.Forms
         {
             _darkMode = !_darkMode;
 
-            // Aplică tema la MainForm
+            UpdateCategoryColorsForTheme();
+
             this.BackColor = C_Bg;
             pnlScroll.BackColor = C_Bg;
-            if (pnlHero != null) pnlHero.BackColor = C_Orange; // hero rămâne portocaliu
+            if (pnlHero != null)
+            {
+                pnlHero.BackColor = C_Orange;
+                pnlHero.Refresh();
+            }
             if (lblGreet != null) lblGreet.ForeColor = C_Muted;
-            if (txtSearch != null) txtSearch.BackColor = _darkMode ? Color.White : Color.FromArgb(240, 240, 240);
-            // Reîncarcă categoriile și produsele pentru a reaplica culorile
-            LoadCats();
+            if (txtSearch != null)
+            {
+                txtSearch.BackColor = _darkMode ? Color.White : Color.FromArgb(240, 240, 240);
+                txtSearch.ForeColor = _darkMode ? Color.Black : Color.FromArgb(60, 60, 70);
+            }
+            if (lblPop != null)
+                lblPop.ForeColor = _darkMode ? Color.White : Color.Black;
+            UpdateExistingCategoriesColors();
             RefreshCards();
-            // Actualizează culoarea butoanelor de navigare
             for (int i = 0; i < _navBtns.Length; i++)
                 _navBtns[i].ForeColor = i == GetCurrentNavIndex() ? C_Orange : C_Muted;
+
+            this.Refresh();
         }
 
         private int GetCurrentNavIndex()
