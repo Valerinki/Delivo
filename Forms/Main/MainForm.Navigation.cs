@@ -229,43 +229,164 @@ namespace Delivo.Forms
 
         private void PerformLogout()
         {
-            var result = MessageBox.Show("Sigur vrei să te deconectezi?", "Deconectare",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
+            using var confirmDialog = new Form
             {
-                new LoginForm().Show();
-                Application.OpenForms[0]?.Close();
-                this.Close();
-            }
+                FormBorderStyle = FormBorderStyle.None,
+                StartPosition = FormStartPosition.CenterParent,
+                BackColor = Color.FromArgb(22, 32, 64),
+                Width = 380,
+                Height = 200,
+                ShowInTaskbar = false,
+                TopMost = true
+            };
+
+            // Colțuri rotunde + bordură portocalie
+            confirmDialog.Paint += (ds, de) =>
+            {
+                var gp = new GraphicsPath();
+                int r = 20;
+                var rect = confirmDialog.ClientRectangle;
+                gp.AddArc(rect.Left, rect.Top, r * 2, r * 2, 180, 90);
+                gp.AddArc(rect.Right - r * 2, rect.Top, r * 2, r * 2, 270, 90);
+                gp.AddArc(rect.Right - r * 2, rect.Bottom - r * 2, r * 2, r * 2, 0, 90);
+                gp.AddArc(rect.Left, rect.Bottom - r * 2, r * 2, r * 2, 90, 90);
+                gp.CloseFigure();
+                confirmDialog.Region = new Region(gp);
+                de.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var pen = new Pen(C_Orange, 2);
+                de.Graphics.DrawPath(pen, gp);
+            };
+
+            // Titlu
+            var lblTitle = new Label
+            {
+                Text = "🔓  Deconectare",
+                Font = new Font("Poppins", 12, FontStyle.Bold),
+                ForeColor = Color.White,
+                Location = new Point(24, 18),
+                AutoSize = true
+            };
+            confirmDialog.Controls.Add(lblTitle);
+
+            // Separator
+            var separator = new Panel
+            {
+                BackColor = C_Orange,
+                Height = 2,
+                Width = confirmDialog.ClientSize.Width - 48,
+                Location = new Point(24, 52)
+            };
+            confirmDialog.Controls.Add(separator);
+
+            // Mesaj întrebare
+            var lblQuestion = new Label
+            {
+                Text = "Sigur vrei să te deconectezi?",
+                Font = new Font("Poppins", 10),
+                ForeColor = Color.FromArgb(200, 215, 240),
+                AutoSize = true,
+                Location = new Point(24, 80)
+            };
+            confirmDialog.Controls.Add(lblQuestion);
+
+            // Butoane
+            int btnW = 100, btnH = 36;
+            var btnYes = new Button
+            {
+                Text = "Da",
+                FlatStyle = FlatStyle.Flat,
+                BackColor = C_Orange,
+                ForeColor = Color.White,
+                Font = new Font("Poppins", 9, FontStyle.Bold),
+                Size = new Size(btnW, btnH),
+                Location = new Point(confirmDialog.ClientSize.Width - btnW * 2 - 20, confirmDialog.ClientSize.Height - 60),
+                Cursor = Cursors.Hand
+            };
+            btnYes.FlatAppearance.BorderSize = 0;
+            Round(btnYes, 18);
+            btnYes.Click += (_, _) =>
+            {
+                confirmDialog.Close();
+                // Repornește aplicația (deschide LoginForm și închide cea curentă)
+                System.Diagnostics.Process.Start(Application.ExecutablePath);
+                Application.Exit();
+            };
+
+            var btnNo = new Button
+            {
+                Text = "Nu",
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(45, 55, 85),
+                ForeColor = Color.White,
+                Font = new Font("Poppins", 9, FontStyle.Bold),
+                Size = new Size(btnW, btnH),
+                Location = new Point(confirmDialog.ClientSize.Width - btnW - 10, confirmDialog.ClientSize.Height - 60),
+                Cursor = Cursors.Hand
+            };
+            btnNo.FlatAppearance.BorderSize = 0;
+            Round(btnNo, 18);
+            btnNo.Click += (_, _) => confirmDialog.Close();
+
+            confirmDialog.Controls.Add(btnYes);
+            confirmDialog.Controls.Add(btnNo);
+
+            // Ajustare la redimensionare
+            confirmDialog.Resize += (_, _) =>
+            {
+                separator.Width = confirmDialog.ClientSize.Width - 48;
+                btnYes.Location = new Point(confirmDialog.ClientSize.Width - btnW * 2 - 20, confirmDialog.ClientSize.Height - 60);
+                btnNo.Location = new Point(confirmDialog.ClientSize.Width - btnW - 10, confirmDialog.ClientSize.Height - 60);
+            };
+
+            confirmDialog.ShowDialog(this);
         }
 
         private void ToggleTheme()
         {
             _darkMode = !_darkMode;
 
-            UpdateCategoryColorsForTheme();
-
+            // Actualizează toate fundalurile principale
             this.BackColor = C_Bg;
             pnlScroll.BackColor = C_Bg;
+            if (pnlHeader != null) pnlHeader.BackColor = C_Bg;
+            if (pnlCatW != null) pnlCatW.BackColor = C_Bg;
+            if (flpCats != null) flpCats.BackColor = C_Bg;
+            if (flpProducts != null) flpProducts.BackColor = C_Bg;
+            if (pnlNavbar != null)
+                pnlNavbar.BackColor = _darkMode ? Color.FromArgb(8, 18, 48) : Color.FromArgb(255, 235, 220); // portocaliu pentru navbar
+
+            // Actualizează culorile categoriilor (dicționarul pentru cercuri)
+            UpdateCategoryColorsForTheme();
+
+            // Actualizează culoarea eroilor (rămâne portocaliu)
             if (pnlHero != null)
             {
                 pnlHero.BackColor = C_Orange;
-                pnlHero.Refresh();
+                pnlHero.Refresh(); // forțează redesenarea curbei
             }
+
+            // Actualizează culorile textelor și ale câmpului de căutare
             if (lblGreet != null) lblGreet.ForeColor = C_Muted;
             if (txtSearch != null)
             {
-                txtSearch.BackColor = _darkMode ? Color.White : Color.FromArgb(240, 240, 240);
+                txtSearch.BackColor = _darkMode ? Color.White : Color.FromArgb(255, 248, 240);
                 txtSearch.ForeColor = _darkMode ? Color.Black : Color.FromArgb(60, 60, 70);
             }
-            if (lblPop != null)
-                lblPop.ForeColor = _darkMode ? Color.White : Color.Black;
+            if (lblPop != null) lblPop.ForeColor = _darkMode ? Color.White : Color.Black;
+            if (lblCat != null) lblCat.ForeColor = _darkMode ? Color.White : Color.Black;
+            // Actualizează culorile categoriilor existente (fără a le recrea)
             UpdateExistingCategoriesColors();
+
+            // Reîncarcă produsele pentru a aplica noile culori cardurilor
             RefreshCards();
+
+            // Actualizează culoarea butoanelor de navigare
             for (int i = 0; i < _navBtns.Length; i++)
                 _navBtns[i].ForeColor = i == GetCurrentNavIndex() ? C_Orange : C_Muted;
 
+            // Redesenare forțată
             this.Refresh();
+            pnlScroll.Refresh();
         }
 
         private int GetCurrentNavIndex()

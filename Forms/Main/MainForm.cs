@@ -10,11 +10,10 @@ namespace Delivo.Forms
     {
         // Tema
         private bool _darkMode = true;
-        private Color C_Bg => _darkMode ? Color.FromArgb(13, 27, 62) : Color.White;
-        private Color C_Card => _darkMode ? Color.FromArgb(22, 32, 64) : Color.FromArgb(250, 250, 252);
-        private Color C_Text => _darkMode ? Color.White : Color.FromArgb(30, 30, 40);
-        private Color C_Muted => _darkMode ? Color.FromArgb(136, 153, 187) : Color.FromArgb(110, 110, 120);
-        private Color C_Border => _darkMode ? Color.FromArgb(40, 255, 255, 255) : Color.FromArgb(200, 200, 200);
+        private Color C_Bg => _darkMode ? Color.FromArgb(13, 27, 62) : Color.FromArgb(255, 240, 220);   // portocaliu deschis
+        private Color C_Card => _darkMode ? Color.FromArgb(22, 32, 64) : Color.FromArgb(255, 250, 245); // ușor crem
+        private Color C_Text => _darkMode ? Color.White : Color.Black;
+        private Color C_Muted => _darkMode ? Color.FromArgb(136, 153, 187) : Color.FromArgb(80, 80, 90);
         private readonly Color C_Orange = Color.FromArgb(255, 107, 0);
         private readonly Color C_NavBg = Color.FromArgb(8, 18, 48);
 
@@ -30,6 +29,7 @@ namespace Delivo.Forms
         private Label lblGreet;
         private Panel pnlHeader, pnlCatW;
         private Label lblPop;
+        private Label lblCat;
         private string _selectedCategory = null;
 
         // Date
@@ -95,7 +95,7 @@ namespace Delivo.Forms
                         string catName = lblN.Text;
                         Color newColor = CatColor.ContainsKey(catName) ? CatColor[catName] : C_Orange;
                         circle.BackColor = newColor;
-                        lblN.ForeColor = Color.White; // ← forțează alb
+                        lblN.ForeColor = _darkMode ? Color.White : Color.Black;
                     }
                 }
             }

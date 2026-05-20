@@ -309,7 +309,7 @@ namespace Delivo.Forms
                 {
                     Text = nm,
                     Font = new Font(F_Normal.FontFamily, 11, FontStyle.Bold),
-                    ForeColor = Color.White,       // ← modificat: forțează alb
+                    ForeColor = _darkMode ? Color.White : Color.Black,
                     Width = 130,
                     Height = 30,
                     TextAlign = ContentAlignment.MiddleCenter,
